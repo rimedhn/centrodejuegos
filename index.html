@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Juegos - Diversión Garantizada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .game-card {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .game-card.memory { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .game-card.snake { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .game-card.tictactoe { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .game-card.quiz { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .game-card.puzzle { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .game-card.calculator { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        
+        .hidden { display: none; }
+        
+        .memory-card {
+            perspective: 1000px;
+        }
+        
+        .memory-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .memory-card.flipped .memory-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .memory-card-front, .memory-card-back {
+            backface-visibility: hidden;
+        }
+        
+        .memory-card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .snake-cell {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #333;
+        }
+        
+        .snake { background-color: #4ade80; }
+        .food { background-color: #ef4444; }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <!-- Panel Principal -->
+    <div id="mainPanel" class="container mx-auto px-4 py-8">
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold text-white mb-4 pulse-animation">🎮 Centro de Juegos</h1>
+            <p class="text-xl text-gray-300">¡Elige tu juego favorito y diviértete!</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <!-- Juego de Memoria -->
+            <div class="game-card memory rounded-2xl p-8 text-white cursor-pointer" onclick="showGame('memory')">
+                <div class="text-6xl mb-4">🧠</div>
+                <h3 class="text-2xl font-bold mb-2">Memoria</h3>
+                <p class="text-lg opacity-90">Encuentra las parejas de cartas</p>
+            </div>
+            
+            <!-- Snake -->
+            <div class="game-card snake rounded-2xl p-8 text-white cursor-pointer" onclick="showGame('snake')">
+                <div class="text-6xl mb-4">🐍</div>
+                <h3 class="text-2xl font-bold mb-2">Snake</h3>
+                <p class="text-lg opacity-90">Come la comida y crece</p>
+            </div>
+            
+            <!-- Tres en Raya -->
+            <div class="game-card tictactoe rounded-2xl p-8 text-white cursor-pointer" onclick="showGame('tictactoe')">
+                <div class="text-6xl mb-4">⭕</div>
+                <h3 class="text-2xl font-bold mb-2">Tres en Raya</h3>
+                <p class="text-lg opacity-90">Clásico juego de estrategia</p>
+            </div>
+            
+            <!-- Quiz -->
+            <div class="game-card quiz rounded-2xl p-8 text-white cursor-pointer" onclick="showGame('quiz')">
+                <div class="text-6xl mb-4">🧩</div>
+                <h3 class="text-2xl font-bold mb-2">Quiz</h3>
+                <p class="text-lg opacity-90">Pon a prueba tus conocimientos</p>
+            </div>
+            
+            <!-- Puzzle Numérico -->
+            <div class="game-card puzzle rounded-2xl p-8 text-white cursor-pointer" onclick="showGame('puzzle')">
+                <div class="text-6xl mb-4">🔢</div>
+                <h3 class="text-2xl font-bold mb-2">Puzzle 15</h3>
+                <p class="text-lg opacity-90">Ordena los números</p>
+            </div>
+            
+            <!-- Calculadora -->
+            <div class="game-card calculator rounded-2xl p-8 text-white cursor-pointer" onclick="showGame('calculator')">
+                <div class="text-6xl mb-4">🧮</div>
+                <h3 class="text-2xl font-bold mb-2">Calculadora</h3>
+                <p class="text-lg opacity-90">Herramienta matemática</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Juego de Memoria -->
+    <div id="memoryGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧠 Juego de Memoria</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            <div class="text-white text-xl mb-4">
+                Movimientos: <span id="memoryMoves">0</span> | 
+                Parejas: <span id="memoryPairs">0</span>/8
+            </div>
+            <button onclick="resetMemoryGame()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Nuevo Juego</button>
+        </div>
+        <div id="memoryBoard" class="grid grid-cols-4 gap-4 max-w-md mx-auto"></div>
+    </div>
+
+    <!-- Snake -->
+    <div id="snakeGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🐍 Snake</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            <div class="text-white text-xl mb-4">
+                Puntuación: <span id="snakeScore">0</span>
+            </div>
+            <button onclick="startSnakeGame()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+            <div class="text-white mb-4">Usa las flechas del teclado para moverte</div>
+        </div>
+        <div id="snakeBoard" class="mx-auto" style="width: 400px; height: 400px; border: 2px solid white;"></div>
+    </div>
+
+    <!-- Tres en Raya -->
+    <div id="tictactoeGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">⭕ Tres en Raya</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            <div class="text-white text-xl mb-4" id="tictactoeStatus">Turno del Jugador X</div>
+            <button onclick="resetTicTacToe()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Nuevo Juego</button>
+        </div>
+        <div id="tictactoeBoard" class="grid grid-cols-3 gap-2 max-w-xs mx-auto"></div>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quizGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧩 Quiz</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            <div class="text-white text-xl mb-4">
+                Pregunta <span id="quizCurrent">1</span> de <span id="quizTotal">5</span> | 
+                Puntos: <span id="quizScore">0</span>
+            </div>
+        </div>
+        <div class="max-w-2xl mx-auto bg-white rounded-2xl p-8">
+            <div id="quizQuestion" class="text-2xl font-bold text-gray-800 mb-6"></div>
+            <div id="quizOptions" class="space-y-4"></div>
+            <button id="quizNext" onclick="nextQuestion()" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mt-6">Siguiente</button>
+        </div>
+    </div>
+
+    <!-- Puzzle 15 -->
+    <div id="puzzleGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🔢 Puzzle 15</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            <div class="text-white text-xl mb-4">Movimientos: <span id="puzzleMoves">0</span></div>
+            <button onclick="shufflePuzzle()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Mezclar</button>
+        </div>
+        <div id="puzzleBoard" class="grid grid-cols-4 gap-2 max-w-xs mx-auto"></div>
+    </div>
+
+    <!-- Calculadora -->
+    <div id="calculatorGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧮 Calculadora</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+        </div>
+        <div class="max-w-sm mx-auto bg-gray-800 rounded-2xl p-6">
+            <div id="calculatorDisplay" class="bg-black text-white text-right text-3xl p-4 rounded-lg mb-4 min-h-16">0</div>
+            <div class="grid grid-cols-4 gap-3">
+                <button onclick="clearCalculator()" class="bg-red-500 hover:bg-red-600 text-white p-4 rounded-lg text-xl font-bold col-span-2">C</button>
+                <button onclick="deleteLast()" class="bg-orange-500 hover:bg-orange-600 text-white p-4 rounded-lg text-xl font-bold">⌫</button>
+                <button onclick="appendToDisplay('/')" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg text-xl font-bold">÷</button>
+                
+                <button onclick="appendToDisplay('7')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">7</button>
+                <button onclick="appendToDisplay('8')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">8</button>
+                <button onclick="appendToDisplay('9')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">9</button>
+                <button onclick="appendToDisplay('*')" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg text-xl font-bold">×</button>
+                
+                <button onclick="appendToDisplay('4')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">4</button>
+                <button onclick="appendToDisplay('5')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">5</button>
+                <button onclick="appendToDisplay('6')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">6</button>
+                <button onclick="appendToDisplay('-')" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg text-xl font-bold">-</button>
+                
+                <button onclick="appendToDisplay('1')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">1</button>
+                <button onclick="appendToDisplay('2')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">2</button>
+                <button onclick="appendToDisplay('3')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">3</button>
+                <button onclick="appendToDisplay('+')" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg text-xl font-bold">+</button>
+                
+                <button onclick="appendToDisplay('0')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold col-span-2">0</button>
+                <button onclick="appendToDisplay('.')" class="bg-gray-600 hover:bg-gray-700 text-white p-4 rounded-lg text-xl font-bold">.</button>
+                <button onclick="calculate()" class="bg-green-500 hover:bg-green-600 text-white p-4 rounded-lg text-xl font-bold">=</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let currentGame = 'main';
+        
+        // Funciones de navegación
+        function showGame(game) {
+            document.getElementById('mainPanel').classList.add('hidden');
+            document.getElementById(game + 'Game').classList.remove('hidden');
+            currentGame = game;
+            
+            // Inicializar juegos específicos
+            if (game === 'memory') initMemoryGame();
+            if (game === 'tictactoe') initTicTacToe();
+            if (game === 'quiz') initQuiz();
+            if (game === 'puzzle') initPuzzle();
+        }
+        
+        function showMainPanel() {
+            document.querySelectorAll('[id$="Game"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById('mainPanel').classList.remove('hidden');
+            currentGame = 'main';
+        }
+
+        // JUEGO DE MEMORIA
+        let memoryCards = [];
+        let flippedCards = [];
+        let memoryMoves = 0;
+        let memoryPairs = 0;
+        
+        const memorySymbols = ['🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎸', '🎺'];
+        
+        function initMemoryGame() {
+            resetMemoryGame();
+        }
+        
+        function resetMemoryGame() {
+            memoryMoves = 0;
+            memoryPairs = 0;
+            flippedCards = [];
+            document.getElementById('memoryMoves').textContent = memoryMoves;
+            document.getElementById('memoryPairs').textContent = memoryPairs;
+            
+            // Crear cartas duplicadas y mezclar
+            memoryCards = [...memorySymbols, ...memorySymbols].sort(() => Math.random() - 0.5);
+            
+            const board = document.getElementById('memoryBoard');
+            board.innerHTML = '';
+            
+            memoryCards.forEach((symbol, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card w-20 h-20 cursor-pointer';
+                card.innerHTML = `
+                    <div class="memory-card-inner relative w-full h-full">
+                        <div class="memory-card-front absolute inset-0 bg-blue-500 rounded-lg flex items-center justify-center text-2xl">?</div>
+                        <div class="memory-card-back absolute inset-0 bg-white rounded-lg flex items-center justify-center text-3xl">${symbol}</div>
+                    </div>
+                `;
+                card.onclick = () => flipMemoryCard(index);
+                board.appendChild(card);
+            });
+        }
+        
+        function flipMemoryCard(index) {
+            if (flippedCards.length === 2 || flippedCards.includes(index)) return;
+            
+            const card = document.getElementById('memoryBoard').children[index];
+            card.classList.add('flipped');
+            flippedCards.push(index);
+            
+            if (flippedCards.length === 2) {
+                memoryMoves++;
+                document.getElementById('memoryMoves').textContent = memoryMoves;
+                
+                setTimeout(() => {
+                    if (memoryCards[flippedCards[0]] === memoryCards[flippedCards[1]]) {
+                        memoryPairs++;
+                        document.getElementById('memoryPairs').textContent = memoryPairs;
+                        if (memoryPairs === 8) {
+                            alert('¡Felicidades! Completaste el juego en ' + memoryMoves + ' movimientos');
+                        }
+                    } else {
+                        document.getElementById('memoryBoard').children[flippedCards[0]].classList.remove('flipped');
+                        document.getElementById('memoryBoard').children[flippedCards[1]].classList.remove('flipped');
+                    }
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        // SNAKE
+        let snake = [{x: 10, y: 10}];
+        let food = {x: 15, y: 15};
+        let dx = 0;
+        let dy = 0;
+        let snakeScore = 0;
+        let snakeRunning = false;
+        
+        function startSnakeGame() {
+            snake = [{x: 10, y: 10}];
+            food = {x: 15, y: 15};
+            dx = 0;
+            dy = 0;
+            snakeScore = 0;
+            snakeRunning = true;
+            document.getElementById('snakeScore').textContent = snakeScore;
+            
+            const board = document.getElementById('snakeBoard');
+            board.innerHTML = '';
+            board.style.display = 'grid';
+            board.style.gridTemplateColumns = 'repeat(20, 1fr)';
+            board.style.gridTemplateRows = 'repeat(20, 1fr)';
+            
+            for (let i = 0; i < 400; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'snake-cell bg-gray-800';
+                board.appendChild(cell);
+            }
+            
+            updateSnakeBoard();
+            gameLoop();
+        }
+        
+        function updateSnakeBoard() {
+            const cells = document.getElementById('snakeBoard').children;
+            
+            // Limpiar tablero
+            for (let cell of cells) {
+                cell.className = 'snake-cell bg-gray-800';
+            }
+            
+            // Dibujar serpiente
+            snake.forEach(segment => {
+                const index = segment.y * 20 + segment.x;
+                if (cells[index]) cells[index].className = 'snake-cell snake';
+            });
+            
+            // Dibujar comida
+            const foodIndex = food.y * 20 + food.x;
+            if (cells[foodIndex]) cells[foodIndex].className = 'snake-cell food';
+        }
+        
+        function gameLoop() {
+            if (!snakeRunning) return;
+            
+            setTimeout(() => {
+                moveSnake();
+                updateSnakeBoard();
+                gameLoop();
+            }, 200);
+        }
+        
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            
+            // Verificar colisiones
+            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || 
+                snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                snakeRunning = false;
+                alert('¡Juego terminado! Puntuación: ' + snakeScore);
+                return;
+            }
+            
+            snake.unshift(head);
+            
+            // Verificar si comió
+            if (head.x === food.x && head.y === food.y) {
+                snakeScore++;
+                document.getElementById('snakeScore').textContent = snakeScore;
+                generateFood();
+            } else {
+                snake.pop();
+            }
+        }
+        
+        function generateFood() {
+            do {
+                food = {
+                    x: Math.floor(Math.random() * 20),
+                    y: Math.floor(Math.random() * 20)
+                };
+            } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+        }
+        
+        // Controles del Snake
+        document.addEventListener('keydown', (e) => {
+            if (currentGame !== 'snake' || !snakeRunning) return;
+            
+            switch(e.key) {
+                case 'ArrowUp': if (dy === 0) { dx = 0; dy = -1; } break;
+                case 'ArrowDown': if (dy === 0) { dx = 0; dy = 1; } break;
+                case 'ArrowLeft': if (dx === 0) { dx = -1; dy = 0; } break;
+                case 'ArrowRight': if (dx === 0) { dx = 1; dy = 0; } break;
+            }
+        });
+
+        // TRES EN RAYA
+        let tictactoeBoard = Array(9).fill('');
+        let currentPlayer = 'X';
+        let tictactoeGameOver = false;
+        
+        function initTicTacToe() {
+            resetTicTacToe();
+        }
+        
+        function resetTicTacToe() {
+            tictactoeBoard = Array(9).fill('');
+            currentPlayer = 'X';
+            tictactoeGameOver = false;
+            document.getElementById('tictactoeStatus').textContent = 'Turno del Jugador X';
+            
+            const board = document.getElementById('tictactoeBoard');
+            board.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'w-20 h-20 bg-white border-2 border-gray-300 flex items-center justify-center text-4xl font-bold cursor-pointer hover:bg-gray-100';
+                cell.onclick = () => makeTicTacToeMove(i);
+                board.appendChild(cell);
+            }
+        }
+        
+        function makeTicTacToeMove(index) {
+            if (tictactoeBoard[index] || tictactoeGameOver) return;
+            
+            tictactoeBoard[index] = currentPlayer;
+            document.getElementById('tictactoeBoard').children[index].textContent = currentPlayer;
+            
+            if (checkTicTacToeWin()) {
+                document.getElementById('tictactoeStatus').textContent = `¡Jugador ${currentPlayer} gana!`;
+                tictactoeGameOver = true;
+            } else if (tictactoeBoard.every(cell => cell)) {
+                document.getElementById('tictactoeStatus').textContent = '¡Empate!';
+                tictactoeGameOver = true;
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                document.getElementById('tictactoeStatus').textContent = `Turno del Jugador ${currentPlayer}`;
+            }
+        }
+        
+        function checkTicTacToeWin() {
+            const winPatterns = [
+                [0,1,2], [3,4,5], [6,7,8], // filas
+                [0,3,6], [1,4,7], [2,5,8], // columnas
+                [0,4,8], [2,4,6] // diagonales
+            ];
+            
+            return winPatterns.some(pattern => 
+                pattern.every(index => tictactoeBoard[index] === currentPlayer)
+            );
+        }
+
+        // QUIZ
+        const quizQuestions = [
+            {
+                question: "¿Cuál es la capital de España?",
+                options: ["Barcelona", "Madrid", "Valencia", "Sevilla"],
+                correct: 1
+            },
+            {
+                question: "¿En qué año llegó el hombre a la Luna?",
+                options: ["1967", "1968", "1969", "1970"],
+                correct: 2
+            },
+            {
+                question: "¿Cuál es el planeta más grande del sistema solar?",
+                options: ["Saturno", "Júpiter", "Neptuno", "Urano"],
+                correct: 1
+            },
+            {
+                question: "¿Quién escribió 'Don Quijote de la Mancha'?",
+                options: ["Lope de Vega", "Miguel de Cervantes", "Calderón de la Barca", "Garcilaso de la Vega"],
+                correct: 1
+            },
+            {
+                question: "¿Cuál es el océano más grande del mundo?",
+                options: ["Atlántico", "Índico", "Ártico", "Pacífico"],
+                correct: 3
+            }
+        ];
+        
+        let currentQuizQuestion = 0;
+        let quizScore = 0;
+        
+        function initQuiz() {
+            currentQuizQuestion = 0;
+            quizScore = 0;
+            document.getElementById('quizScore').textContent = quizScore;
+            document.getElementById('quizCurrent').textContent = 1;
+            document.getElementById('quizTotal').textContent = quizQuestions.length;
+            showQuizQuestion();
+        }
+        
+        function showQuizQuestion() {
+            const question = quizQuestions[currentQuizQuestion];
+            document.getElementById('quizQuestion').textContent = question.question;
+            
+            const optionsDiv = document.getElementById('quizOptions');
+            optionsDiv.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'w-full p-4 text-left bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors';
+                button.textContent = option;
+                button.onclick = () => selectQuizAnswer(index);
+                optionsDiv.appendChild(button);
+            });
+            
+            document.getElementById('quizNext').classList.add('hidden');
+        }
+        
+        function selectQuizAnswer(selectedIndex) {
+            const question = quizQuestions[currentQuizQuestion];
+            const options = document.getElementById('quizOptions').children;
+            
+            // Deshabilitar todas las opciones
+            for (let option of options) {
+                option.disabled = true;
+                option.classList.remove('hover:bg-gray-200');
+            }
+            
+            // Mostrar respuesta correcta e incorrecta
+            options[question.correct].classList.add('bg-green-500', 'text-white');
+            if (selectedIndex !== question.correct) {
+                options[selectedIndex].classList.add('bg-red-500', 'text-white');
+            } else {
+                quizScore++;
+                document.getElementById('quizScore').textContent = quizScore;
+            }
+            
+            document.getElementById('quizNext').classList.remove('hidden');
+        }
+        
+        function nextQuestion() {
+            currentQuizQuestion++;
+            
+            if (currentQuizQuestion < quizQuestions.length) {
+                document.getElementById('quizCurrent').textContent = currentQuizQuestion + 1;
+                showQuizQuestion();
+            } else {
+                // Fin del quiz
+                document.getElementById('quizQuestion').textContent = `¡Quiz completado! Puntuación final: ${quizScore}/${quizQuestions.length}`;
+                document.getElementById('quizOptions').innerHTML = `
+                    <button onclick="initQuiz()" class="w-full p-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg">
+                        Jugar de nuevo
+                    </button>
+                `;
+                document.getElementById('quizNext').classList.add('hidden');
+            }
+        }
+
+        // PUZZLE 15
+        let puzzleBoard = [];
+        let puzzleMoves = 0;
+        let emptyIndex = 15;
+        
+        function initPuzzle() {
+            puzzleBoard = Array.from({length: 16}, (_, i) => i === 15 ? 0 : i + 1);
+            puzzleMoves = 0;
+            emptyIndex = 15;
+            document.getElementById('puzzleMoves').textContent = puzzleMoves;
+            renderPuzzle();
+        }
+        
+        function renderPuzzle() {
+            const board = document.getElementById('puzzleBoard');
+            board.innerHTML = '';
+            
+            puzzleBoard.forEach((num, index) => {
+                const tile = document.createElement('div');
+                tile.className = num === 0 ? 
+                    'w-16 h-16 bg-gray-300' : 
+                    'w-16 h-16 bg-blue-500 text-white flex items-center justify-center text-xl font-bold cursor-pointer hover:bg-blue-600';
+                tile.textContent = num === 0 ? '' : num;
+                if (num !== 0) tile.onclick = () => movePuzzleTile(index);
+                board.appendChild(tile);
+            });
+        }
+        
+        function movePuzzleTile(index) {
+            const row = Math.floor(index / 4);
+            const col = index % 4;
+            const emptyRow = Math.floor(emptyIndex / 4);
+            const emptyCol = emptyIndex % 4;
+            
+            // Verificar si el movimiento es válido
+            if (Math.abs(row - emptyRow) + Math.abs(col - emptyCol) === 1) {
+                puzzleBoard[emptyIndex] = puzzleBoard[index];
+                puzzleBoard[index] = 0;
+                emptyIndex = index;
+                puzzleMoves++;
+                document.getElementById('puzzleMoves').textContent = puzzleMoves;
+                renderPuzzle();
+                
+                // Verificar si ganó
+                if (checkPuzzleWin()) {
+                    setTimeout(() => alert(`¡Felicidades! Completaste el puzzle en ${puzzleMoves} movimientos`), 100);
+                }
+            }
+        }
+        
+        function checkPuzzleWin() {
+            for (let i = 0; i < 15; i++) {
+                if (puzzleBoard[i] !== i + 1) return false;
+            }
+            return puzzleBoard[15] === 0;
+        }
+        
+        function shufflePuzzle() {
+            // Realizar movimientos aleatorios válidos para mezclar
+            for (let i = 0; i < 1000; i++) {
+                const possibleMoves = [];
+                const row = Math.floor(emptyIndex / 4);
+                const col = emptyIndex % 4;
+                
+                if (row > 0) possibleMoves.push(emptyIndex - 4);
+                if (row < 3) possibleMoves.push(emptyIndex + 4);
+                if (col > 0) possibleMoves.push(emptyIndex - 1);
+                if (col < 3) possibleMoves.push(emptyIndex + 1);
+                
+                const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                puzzleBoard[emptyIndex] = puzzleBoard[randomMove];
+                puzzleBoard[randomMove] = 0;
+                emptyIndex = randomMove;
+            }
+            
+            puzzleMoves = 0;
+            document.getElementById('puzzleMoves').textContent = puzzleMoves;
+            renderPuzzle();
+        }
+
+        // CALCULADORA
+        let calculatorDisplay = '0';
+        let calculatorPreviousValue = null;
+        let calculatorOperation = null;
+        let calculatorWaitingForOperand = false;
+        
+        function updateCalculatorDisplay() {
+            document.getElementById('calculatorDisplay').textContent = calculatorDisplay;
+        }
+        
+        function appendToDisplay(value) {
+            if (calculatorWaitingForOperand) {
+                calculatorDisplay = value;
+                calculatorWaitingForOperand = false;
+            } else {
+                calculatorDisplay = calculatorDisplay === '0' ? value : calculatorDisplay + value;
+            }
+            updateCalculatorDisplay();
+        }
+        
+        function clearCalculator() {
+            calculatorDisplay = '0';
+            calculatorPreviousValue = null;
+            calculatorOperation = null;
+            calculatorWaitingForOperand = false;
+            updateCalculatorDisplay();
+        }
+        
+        function deleteLast() {
+            calculatorDisplay = calculatorDisplay.slice(0, -1) || '0';
+            updateCalculatorDisplay();
+        }
+        
+        function calculate() {
+            const inputValue = parseFloat(calculatorDisplay);
+            
+            if (calculatorPreviousValue === null) {
+                calculatorPreviousValue = inputValue;
+            } else if (calculatorOperation) {
+                const currentValue = calculatorPreviousValue || 0;
+                let result;
+                
+                switch (calculatorOperation) {
+                    case '+': result = currentValue + inputValue; break;
+                    case '-': result = currentValue - inputValue; break;
+                    case '*': result = currentValue * inputValue; break;
+                    case '/': result = inputValue !== 0 ? currentValue / inputValue : 0; break;
+                    default: return;
+                }
+                
+                calculatorDisplay = String(result);
+                calculatorPreviousValue = result;
+            }
+            
+            calculatorWaitingForOperand = true;
+            calculatorOperation = null;
+            updateCalculatorDisplay();
+        }
+        
+        // Sobrescribir appendToDisplay para operaciones
+        const originalAppendToDisplay = appendToDisplay;
+        appendToDisplay = function(value) {
+            if (['+', '-', '*', '/'].includes(value)) {
+                const inputValue = parseFloat(calculatorDisplay);
+                
+                if (calculatorPreviousValue === null) {
+                    calculatorPreviousValue = inputValue;
+                } else if (calculatorOperation) {
+                    const currentValue = calculatorPreviousValue || 0;
+                    let result;
+                    
+                    switch (calculatorOperation) {
+                        case '+': result = currentValue + inputValue; break;
+                        case '-': result = currentValue - inputValue; break;
+                        case '*': result = currentValue * inputValue; break;
+                        case '/': result = inputValue !== 0 ? currentValue / inputValue : 0; break;
+                        default: return;
+                    }
+                    
+                    calculatorDisplay = String(result);
+                    calculatorPreviousValue = result;
+                    updateCalculatorDisplay();
+                }
+                
+                calculatorWaitingForOperand = true;
+                calculatorOperation = value;
+            } else {
+                originalAppendToDisplay(value);
+            }
+        };
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98275147663b353a',t:'MTc1ODQzNDE2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
