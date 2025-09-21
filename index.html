@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameHub Pro - Centro de Juegos Premium</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .game-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        
+        .category-arcade { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .category-puzzle { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .category-strategy { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .category-educational { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .category-tools { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .category-action { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        
+        .hidden { display: none !important; }
+        
+        .modal {
+            backdrop-filter: blur(10px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .carousel-container {
+            overflow: hidden;
+        }
+        
+        .carousel-track {
+            display: flex;
+            animation: scroll 20s linear infinite;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        .whatsapp-float {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            z-index: 1000;
+            animation: bounce 2s infinite;
+        }
+        
+        @media (min-width: 640px) {
+            .whatsapp-float {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .snake-cell {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #333;
+        }
+        
+        .snake { background-color: #4ade80; border-radius: 2px; }
+        .food { background-color: #ef4444; border-radius: 50%; }
+        
+        .memory-card {
+            perspective: 1000px;
+        }
+        
+        .memory-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .memory-card.flipped .memory-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .memory-card-front, .memory-card-back {
+            backface-visibility: hidden;
+        }
+        
+        .memory-card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .difficulty-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .difficulty-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        .level-indicator {
+            background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .falling-block {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #333;
+        }
+
+        .tetris-I { background: #00f0f0; }
+        .tetris-O { background: #f0f000; }
+        .tetris-T { background: #a000f0; }
+        .tetris-S { background: #00f000; }
+        .tetris-Z { background: #f00000; }
+        .tetris-J { background: #0000f0; }
+        .tetris-L { background: #f0a000; }
+
+        .pong-paddle {
+            position: absolute;
+            background: white;
+            border-radius: 4px;
+        }
+
+        .pong-ball {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .breakout-brick {
+            border: 1px solid #333;
+            border-radius: 4px;
+        }
+
+        .brick-red { background: #ef4444; }
+        .brick-orange { background: #f97316; }
+        .brick-yellow { background: #eab308; }
+        .brick-green { background: #22c55e; }
+        .brick-blue { background: #3b82f6; }
+
+        .simon-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 4px solid #333;
+        }
+
+        .simon-red { background: #dc2626; }
+        .simon-blue { background: #2563eb; }
+        .simon-green { background: #16a34a; }
+        .simon-yellow { background: #ca8a04; }
+
+        .simon-button.active {
+            filter: brightness(1.5);
+            transform: scale(0.95);
+        }
+
+        .word-letter {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            margin: 2px;
+        }
+
+        .letter-correct { background: #22c55e; color: white; }
+        .letter-present { background: #eab308; color: white; }
+        .letter-absent { background: #6b7280; color: white; }
+
+        .typing-cursor {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <!-- Header -->
+    <header class="bg-black bg-opacity-20 backdrop-blur-lg border-b border-white border-opacity-20">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center space-x-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" alt="GameHub Pro Logo" class="w-8 h-8 sm:w-10 sm:h-10">
+                <h1 class="text-xl sm:text-2xl font-bold text-white">GameHub Pro</h1>
+            </div>
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button onclick="shareWebsite()" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 sm:px-4 rounded-lg flex items-center space-x-1 sm:space-x-2 transition-colors text-sm sm:text-base">
+                    <i class="fas fa-share-alt"></i>
+                    <span class="hidden sm:inline">Compartir</span>
+                </button>
+                <div class="flex space-x-1 sm:space-x-2">
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-white hover:text-blue-400 text-lg sm:text-xl transition-colors">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-white hover:text-blue-400 text-lg sm:text-xl transition-colors">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-white hover:text-pink-400 text-lg sm:text-xl transition-colors">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Carrusel de Promociones -->
+    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 py-3">
+        <div class="carousel-container">
+            <div class="carousel-track">
+                <div class="flex space-x-8 text-white font-semibold whitespace-nowrap">
+                    <span>🎮 ¡20 juegos completamente funcionales disponibles!</span>
+                    <span>🏆 Compite en todos los juegos y mejora tus puntuaciones</span>
+                    <span>🎯 Desde clásicos como Tetris hasta modernos como Simon</span>
+                    <span>🧩 Juegos de lógica, acción, estrategia y más</span>
+                    <span>⭐ ¡Diversión garantizada para toda la familia!</span>
+                    <span>🎮 ¡20 juegos completamente funcionales disponibles!</span>
+                    <span>🏆 Compite en todos los juegos y mejora tus puntuaciones</span>
+                    <span>🧩 Juegos de lógica, acción, estrategia y más</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Principal -->
+    <div id="mainPanel" class="container mx-auto px-4 py-8">
+        <div class="text-center mb-8 sm:mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">🎮 Centro de Juegos Premium</h2>
+            <p class="text-lg sm:text-xl text-gray-300 px-4">¡20 juegos completamente funcionales te esperan!</p>
+        </div>
+        
+        <!-- Categorías -->
+        <div class="mb-6 sm:mb-8">
+            <div class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-6 sm:mb-8 px-4">
+                <button onclick="filterGames('all')" class="category-filter bg-white text-gray-800 px-3 sm:px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors active text-sm sm:text-base">
+                    Todos
+                </button>
+                <button onclick="filterGames('arcade')" class="category-filter bg-white bg-opacity-20 text-white px-3 sm:px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors text-sm sm:text-base">
+                    Arcade
+                </button>
+                <button onclick="filterGames('puzzle')" class="category-filter bg-white bg-opacity-20 text-white px-3 sm:px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors text-sm sm:text-base">
+                    Puzzle
+                </button>
+                <button onclick="filterGames('strategy')" class="category-filter bg-white bg-opacity-20 text-white px-3 sm:px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors text-sm sm:text-base">
+                    Estrategia
+                </button>
+                <button onclick="filterGames('educational')" class="category-filter bg-white bg-opacity-20 text-white px-3 sm:px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors text-sm sm:text-base">
+                    Educativo
+                </button>
+                <button onclick="filterGames('tools')" class="category-filter bg-white bg-opacity-20 text-white px-3 sm:px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors text-sm sm:text-base">
+                    Herramientas
+                </button>
+                <button onclick="filterGames('action')" class="category-filter bg-white bg-opacity-20 text-white px-3 sm:px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors text-sm sm:text-base">
+                    Acción
+                </button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6 max-w-7xl mx-auto" id="gamesGrid">
+            <!-- Juegos Arcade -->
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('snake')">
+                <div class="text-5xl mb-3">🐍</div>
+                <h3 class="text-xl font-bold mb-2">Snake</h3>
+                <p class="text-sm opacity-90">Come y crece sin chocar</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('tetris')">
+                <div class="text-5xl mb-3">🧱</div>
+                <h3 class="text-xl font-bold mb-2">Tetris</h3>
+                <p class="text-sm opacity-90">Completa líneas y sube de nivel</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>10 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('pong')">
+                <div class="text-5xl mb-3">🏓</div>
+                <h3 class="text-xl font-bold mb-2">Pong</h3>
+                <p class="text-sm opacity-90">Clásico juego de ping pong</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles IA</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('breakout')">
+                <div class="text-5xl mb-3">🎯</div>
+                <h3 class="text-xl font-bold mb-2">Breakout</h3>
+                <p class="text-sm opacity-90">Rompe todos los bloques</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>5 Niveles</span>
+                </div>
+            </div>
+
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('flappybird')">
+                <div class="text-5xl mb-3">🐦</div>
+                <h3 class="text-xl font-bold mb-2">Flappy Bird</h3>
+                <p class="text-sm opacity-90">Vuela entre los obstáculos</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>Infinito</span>
+                </div>
+            </div>
+
+            <!-- Juegos Puzzle -->
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('memory')">
+                <div class="text-5xl mb-3">🧠</div>
+                <h3 class="text-xl font-bold mb-2">Memoria</h3>
+                <p class="text-sm opacity-90">Encuentra las parejas</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>4 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('puzzle')">
+                <div class="text-5xl mb-3">🔢</div>
+                <h3 class="text-xl font-bold mb-2">Puzzle 15</h3>
+                <p class="text-sm opacity-90">Ordena los números</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Tamaños</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('sudoku')">
+                <div class="text-5xl mb-3">🔢</div>
+                <h3 class="text-xl font-bold mb-2">Sudoku</h3>
+                <p class="text-sm opacity-90">Completa la cuadrícula</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('wordle')">
+                <div class="text-5xl mb-3">📝</div>
+                <h3 class="text-xl font-bold mb-2">Wordle</h3>
+                <p class="text-sm opacity-90">Adivina la palabra</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>6 Intentos</span>
+                </div>
+            </div>
+
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('simon')">
+                <div class="text-5xl mb-3">🎵</div>
+                <h3 class="text-xl font-bold mb-2">Simon Dice</h3>
+                <p class="text-sm opacity-90">Repite la secuencia</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>Infinito</span>
+                </div>
+            </div>
+
+            <!-- Juegos Estrategia -->
+            <div class="game-card category-strategy rounded-2xl p-6 text-white cursor-pointer" data-category="strategy" onclick="showGame('tictactoe')">
+                <div class="text-5xl mb-3">⭕</div>
+                <h3 class="text-xl font-bold mb-2">Tres en Raya</h3>
+                <p class="text-sm opacity-90">Estrategia clásica</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles IA</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-strategy rounded-2xl p-6 text-white cursor-pointer" data-category="strategy" onclick="showGame('connect4')">
+                <div class="text-5xl mb-3">🔴</div>
+                <h3 class="text-xl font-bold mb-2">Conecta 4</h3>
+                <p class="text-sm opacity-90">Conecta cuatro fichas</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles IA</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-strategy rounded-2xl p-6 text-white cursor-pointer" data-category="strategy" onclick="showGame('checkers')">
+                <div class="text-5xl mb-3">⚫</div>
+                <h3 class="text-xl font-bold mb-2">Damas</h3>
+                <p class="text-sm opacity-90">Captura todas las piezas</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>2 Jugadores</span>
+                </div>
+            </div>
+
+            <div class="game-card category-strategy rounded-2xl p-6 text-white cursor-pointer" data-category="strategy" onclick="showGame('minesweeper')">
+                <div class="text-5xl mb-3">💣</div>
+                <h3 class="text-xl font-bold mb-2">Buscaminas</h3>
+                <p class="text-sm opacity-90">Encuentra todas las minas</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles</span>
+                </div>
+            </div>
+
+            <!-- Juegos Educativos -->
+            <div class="game-card category-educational rounded-2xl p-6 text-white cursor-pointer" data-category="educational" onclick="showGame('quiz')">
+                <div class="text-5xl mb-3">🧩</div>
+                <h3 class="text-xl font-bold mb-2">Quiz</h3>
+                <p class="text-sm opacity-90">Pon a prueba tus conocimientos</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>5 Categorías</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-educational rounded-2xl p-6 text-white cursor-pointer" data-category="educational" onclick="showGame('math')">
+                <div class="text-5xl mb-3">➕</div>
+                <h3 class="text-xl font-bold mb-2">Matemáticas</h3>
+                <p class="text-sm opacity-90">Practica operaciones</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>4 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-educational rounded-2xl p-6 text-white cursor-pointer" data-category="educational" onclick="showGame('typing')">
+                <div class="text-5xl mb-3">⌨️</div>
+                <h3 class="text-xl font-bold mb-2">Mecanografía</h3>
+                <p class="text-sm opacity-90">Mejora tu velocidad</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>5 Niveles</span>
+                </div>
+            </div>
+
+            <div class="game-card category-educational rounded-2xl p-6 text-white cursor-pointer" data-category="educational" onclick="showGame('geography')">
+                <div class="text-5xl mb-3">🌍</div>
+                <h3 class="text-xl font-bold mb-2">Geografía</h3>
+                <p class="text-sm opacity-90">Aprende países y capitales</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>200+ Países</span>
+                </div>
+            </div>
+
+            <!-- Herramientas -->
+            <div class="game-card category-tools rounded-2xl p-6 text-white cursor-pointer" data-category="tools" onclick="showGame('calculator')">
+                <div class="text-5xl mb-3">🧮</div>
+                <h3 class="text-xl font-bold mb-2">Calculadora</h3>
+                <p class="text-sm opacity-90">Herramienta matemática</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>Científica</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-tools rounded-2xl p-6 text-white cursor-pointer" data-category="tools" onclick="showGame('stopwatch')">
+                <div class="text-5xl mb-3">⏱️</div>
+                <h3 class="text-xl font-bold mb-2">Cronómetro</h3>
+                <p class="text-sm opacity-90">Mide el tiempo con precisión</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>Milisegundos</span>
+                </div>
+            </div>
+
+            <!-- Juegos de Acción -->
+            <div class="game-card category-action rounded-2xl p-6 text-white cursor-pointer" data-category="action" onclick="showGame('reaction')">
+                <div class="text-5xl mb-3">⚡</div>
+                <h3 class="text-xl font-bold mb-2">Tiempo de Reacción</h3>
+                <p class="text-sm opacity-90">Mide tu velocidad de reacción</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>Milisegundos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Juego de Snake -->
+    <div id="snakeGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🐍 Snake</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Dificultad -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Selecciona la Dificultad:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setSnakeDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Fácil
+                    </button>
+                    <button onclick="setSnakeDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Medio
+                    </button>
+                    <button onclick="setSnakeDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Difícil
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Puntuación: <span id="snakeScore">0</span> | 
+                Nivel: <span id="snakeLevel">1</span> |
+                Récord: <span id="snakeRecord">0</span>
+            </div>
+            <button onclick="startSnakeGame()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+            <div class="text-white mb-4">Usa WASD o las flechas del teclado para moverte</div>
+        </div>
+        <div id="snakeBoard" class="mx-auto bg-gray-900 border-4 border-white rounded-lg" style="width: 400px; height: 400px;"></div>
+    </div>
+
+    <!-- Juego de Tetris -->
+    <div id="tetrisGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧱 Tetris</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="text-white text-xl mb-4">
+                Puntuación: <span id="tetrisScore">0</span> | 
+                Nivel: <span id="tetrisLevel">1</span> |
+                Líneas: <span id="tetrisLines">0</span>
+            </div>
+            <button onclick="startTetrisGame()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+            <div class="text-white mb-4">Usa A/D para mover, S para bajar rápido, W para rotar</div>
+        </div>
+        <div class="flex justify-center">
+            <div id="tetrisBoard" class="bg-black border-4 border-white rounded-lg relative" style="width: 300px; height: 600px;"></div>
+        </div>
+    </div>
+
+    <!-- Juego de Pong -->
+    <div id="pongGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🏓 Pong</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Dificultad de la IA:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setPongDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Fácil
+                    </button>
+                    <button onclick="setPongDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Medio
+                    </button>
+                    <button onclick="setPongDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Difícil
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Jugador: <span id="playerScore">0</span> | 
+                IA: <span id="aiScore">0</span>
+            </div>
+            <button onclick="startPongGame()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+            <div class="text-white mb-4">Usa W/S o las flechas ↑/↓ para mover tu paleta</div>
+        </div>
+        <div class="flex justify-center">
+            <div id="pongBoard" class="bg-black border-4 border-white rounded-lg relative" style="width: 600px; height: 400px;">
+                <div id="playerPaddle" class="pong-paddle" style="width: 10px; height: 80px; left: 20px; top: 160px;"></div>
+                <div id="aiPaddle" class="pong-paddle" style="width: 10px; height: 80px; right: 20px; top: 160px;"></div>
+                <div id="pongBall" class="pong-ball" style="width: 15px; height: 15px; left: 292px; top: 192px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Juego de Breakout -->
+    <div id="breakoutGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🎯 Breakout</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="text-white text-xl mb-4">
+                Puntuación: <span id="breakoutScore">0</span> | 
+                Vidas: <span id="breakoutLives">3</span> |
+                Nivel: <span id="breakoutLevel">1</span>
+            </div>
+            <button onclick="startBreakoutGame()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+            <div class="text-white mb-4">Usa A/D o las flechas ←/→ para mover la paleta</div>
+        </div>
+        <div class="flex justify-center">
+            <div id="breakoutBoard" class="bg-black border-4 border-white rounded-lg relative" style="width: 600px; height: 500px;">
+                <div id="breakoutPaddle" class="bg-white" style="position: absolute; width: 100px; height: 15px; bottom: 30px; left: 250px; border-radius: 8px;"></div>
+                <div id="breakoutBall" class="bg-white" style="position: absolute; width: 15px; height: 15px; bottom: 50px; left: 292px; border-radius: 50%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Juego de Flappy Bird -->
+    <div id="flappybirdGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🐦 Flappy Bird</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="text-white text-xl mb-4">
+                Puntuación: <span id="flappyScore">0</span> | 
+                Mejor: <span id="flappyBest">0</span>
+            </div>
+            <button onclick="startFlappyGame()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+            <div class="text-white mb-4">Presiona ESPACIO o haz clic para volar</div>
+        </div>
+        <div class="flex justify-center">
+            <div id="flappyBoard" class="bg-gradient-to-b from-blue-400 to-blue-600 border-4 border-white rounded-lg relative overflow-hidden" style="width: 400px; height: 600px;">
+                <div id="flappyBird" class="absolute bg-yellow-400 border-2 border-yellow-600 rounded-full" style="width: 30px; height: 30px; left: 50px; top: 285px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Juego de Memoria -->
+    <div id="memoryGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧠 Juego de Memoria</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Dificultad -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Selecciona la Dificultad:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setMemoryDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        4x4 (Fácil)
+                    </button>
+                    <button onclick="setMemoryDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        6x6 (Medio)
+                    </button>
+                    <button onclick="setMemoryDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        8x8 (Difícil)
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Movimientos: <span id="memoryMoves">0</span> | 
+                Parejas: <span id="memoryPairs">0</span>/<span id="memoryTotal">8</span> |
+                Tiempo: <span id="memoryTime">00:00</span>
+            </div>
+            <button onclick="resetMemoryGame()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Nuevo Juego</button>
+        </div>
+        <div id="memoryBoard" class="grid gap-4 max-w-2xl mx-auto"></div>
+    </div>
+
+    <!-- Juego de Sudoku -->
+    <div id="sudokuGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🔢 Sudoku</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Dificultad:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setSudokuDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Fácil
+                    </button>
+                    <button onclick="setSudokuDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Medio
+                    </button>
+                    <button onclick="setSudokuDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Difícil
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Tiempo: <span id="sudokuTime">00:00</span> |
+                Errores: <span id="sudokuErrors">0</span>/3
+            </div>
+            <button onclick="newSudokuGame()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg mb-4">Nuevo Juego</button>
+        </div>
+        <div class="flex justify-center">
+            <div id="sudokuBoard" class="grid grid-cols-9 gap-1 bg-black p-2 rounded-lg"></div>
+        </div>
+    </div>
+
+    <!-- Juego de Wordle -->
+    <div id="wordleGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">📝 Wordle</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="text-white text-xl mb-4">
+                Intento: <span id="wordleAttempt">1</span>/6 |
+                Racha: <span id="wordleStreak">0</span>
+            </div>
+            <button onclick="newWordleGame()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg mb-4">Nueva Palabra</button>
+            <div class="text-white mb-4">Escribe una palabra de 5 letras y presiona ENTER</div>
+        </div>
+        <div class="max-w-sm mx-auto">
+            <div id="wordleBoard" class="grid grid-rows-6 gap-2 mb-4"></div>
+            <input type="text" id="wordleInput" class="w-full p-3 text-center text-2xl font-bold uppercase bg-white rounded-lg" maxlength="5" placeholder="PALABRA">
+        </div>
+    </div>
+
+    <!-- Juego de Simon Dice -->
+    <div id="simonGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🎵 Simon Dice</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="text-white text-xl mb-4">
+                Nivel: <span id="simonLevel">0</span> |
+                Récord: <span id="simonRecord">0</span>
+            </div>
+            <button onclick="startSimonGame()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+            <div class="text-white mb-4">Memoriza y repite la secuencia de colores</div>
+        </div>
+        <div class="flex justify-center">
+            <div class="grid grid-cols-2 gap-4">
+                <div id="simon-red" class="simon-button simon-red" onclick="simonButtonClick(0)"></div>
+                <div id="simon-blue" class="simon-button simon-blue" onclick="simonButtonClick(1)"></div>
+                <div id="simon-green" class="simon-button simon-green" onclick="simonButtonClick(2)"></div>
+                <div id="simon-yellow" class="simon-button simon-yellow" onclick="simonButtonClick(3)"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Juego de Tres en Raya -->
+    <div id="tictactoeGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">⭕ Tres en Raya</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Dificultad IA -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Dificultad de la IA:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setTicTacToeDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Fácil
+                    </button>
+                    <button onclick="setTicTacToeDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Medio
+                    </button>
+                    <button onclick="setTicTacToeDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Imposible
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4" id="tictactoeStatus">Turno del Jugador X</div>
+            <div class="text-white mb-4">
+                Victorias: <span id="playerWins">0</span> | 
+                Empates: <span id="draws">0</span> | 
+                Derrotas: <span id="aiWins">0</span>
+            </div>
+            <button onclick="resetTicTacToe()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Nuevo Juego</button>
+        </div>
+        <div id="tictactoeBoard" class="grid grid-cols-3 gap-2 max-w-xs mx-auto"></div>
+    </div>
+
+    <!-- Juego de Conecta 4 -->
+    <div id="connect4Game" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🔴 Conecta 4</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Dificultad de la IA:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setConnect4Difficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Fácil
+                    </button>
+                    <button onclick="setConnect4Difficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Medio
+                    </button>
+                    <button onclick="setConnect4Difficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Difícil
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4" id="connect4Status">Turno del Jugador Rojo</div>
+            <button onclick="resetConnect4()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Nuevo Juego</button>
+        </div>
+        <div class="flex justify-center">
+            <div id="connect4Board" class="grid grid-cols-7 gap-2 bg-blue-600 p-4 rounded-lg"></div>
+        </div>
+    </div>
+
+    <!-- Juego de Damas -->
+    <div id="checkersGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">⚫ Damas</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="text-white text-xl mb-4" id="checkersStatus">Turno de las Rojas</div>
+            <button onclick="resetCheckers()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Nuevo Juego</button>
+            <div class="text-white mb-4">Haz clic en una pieza y luego en el destino</div>
+        </div>
+        <div class="flex justify-center">
+            <div id="checkersBoard" class="grid grid-cols-8 gap-0 border-4 border-white rounded-lg overflow-hidden"></div>
+        </div>
+    </div>
+
+    <!-- Juego de Buscaminas -->
+    <div id="minesweeperGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">💣 Buscaminas</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Dificultad:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setMinesweeperDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Fácil (9x9)
+                    </button>
+                    <button onclick="setMinesweeperDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Medio (16x16)
+                    </button>
+                    <button onclick="setMinesweeperDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Difícil (16x30)
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Minas: <span id="minesLeft">10</span> |
+                Tiempo: <span id="minesweeperTime">000</span>
+            </div>
+            <button onclick="newMinesweeperGame()" class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg mb-4">Nuevo Juego</button>
+            <div class="text-white mb-4">Clic izquierdo para revelar, clic derecho para marcar</div>
+        </div>
+        <div class="flex justify-center">
+            <div id="minesweeperBoard" class="grid gap-1 bg-gray-600 p-2 rounded-lg"></div>
+        </div>
+    </div>
+
+    <!-- Juego de Quiz -->
+    <div id="quizGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧩 Quiz</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Categoría -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Selecciona una Categoría:</h3>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="setQuizCategory('general')" class="difficulty-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg active">
+                        General
+                    </button>
+                    <button onclick="setQuizCategory('science')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                        Ciencia
+                    </button>
+                    <button onclick="setQuizCategory('history')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Historia
+                    </button>
+                    <button onclick="setQuizCategory('sports')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Deportes
+                    </button>
+                    <button onclick="setQuizCategory('geography')" class="difficulty-btn bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
+                        Geografía
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Pregunta <span id="quizCurrent">1</span> de <span id="quizTotal">10</span> | 
+                Puntos: <span id="quizScore">0</span> |
+                Tiempo: <span id="quizTimer">30</span>s
+            </div>
+        </div>
+        <div class="max-w-2xl mx-auto bg-white rounded-2xl p-8">
+            <div id="quizQuestion" class="text-2xl font-bold text-gray-800 mb-6"></div>
+            <div id="quizOptions" class="space-y-4"></div>
+            <button id="quizNext" onclick="nextQuestion()" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mt-6">Siguiente</button>
+        </div>
+    </div>
+
+    <!-- Juego de Matemáticas -->
+    <div id="mathGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">➕ Matemáticas</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Nivel:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setMathLevel('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Suma/Resta
+                    </button>
+                    <button onclick="setMathLevel('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Multiplicación
+                    </button>
+                    <button onclick="setMathLevel('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        División
+                    </button>
+                    <button onclick="setMathLevel('mixed')" class="difficulty-btn bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
+                        Mixto
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Puntuación: <span id="mathScore">0</span> |
+                Racha: <span id="mathStreak">0</span> |
+                Tiempo: <span id="mathTimer">60</span>s
+            </div>
+            <button onclick="startMathGame()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+        </div>
+        <div class="max-w-md mx-auto bg-white rounded-2xl p-8">
+            <div id="mathQuestion" class="text-4xl font-bold text-center text-gray-800 mb-6">¡Presiona Iniciar!</div>
+            <input type="number" id="mathAnswer" class="w-full p-4 text-2xl text-center border-2 border-gray-300 rounded-lg mb-4" placeholder="Tu respuesta">
+            <button onclick="checkMathAnswer()" class="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg text-xl font-bold">Comprobar</button>
+        </div>
+    </div>
+
+    <!-- Juego de Mecanografía -->
+    <div id="typingGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">⌨️ Mecanografía</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Nivel:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setTypingLevel('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Palabras Simples
+                    </button>
+                    <button onclick="setTypingLevel('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Frases Cortas
+                    </button>
+                    <button onclick="setTypingLevel('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Párrafos
+                    </button>
+                    <button onclick="setTypingLevel('numbers')" class="difficulty-btn bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
+                        Números
+                    </button>
+                    <button onclick="setTypingLevel('symbols')" class="difficulty-btn bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg">
+                        Símbolos
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                PPM: <span id="typingWPM">0</span> |
+                Precisión: <span id="typingAccuracy">100</span>% |
+                Tiempo: <span id="typingTimer">60</span>s
+            </div>
+            <button onclick="startTypingGame()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Test</button>
+        </div>
+        <div class="max-w-4xl mx-auto">
+            <div id="typingText" class="bg-white p-6 rounded-lg text-2xl leading-relaxed mb-4 min-h-32"></div>
+            <textarea id="typingInput" class="w-full p-4 text-xl border-2 border-gray-300 rounded-lg resize-none" rows="4" placeholder="Escribe aquí cuando comience el test..." disabled></textarea>
+        </div>
+    </div>
+
+    <!-- Juego de Geografía -->
+    <div id="geographyGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🌍 Geografía</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Modo de Juego:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setGeographyMode('capitals')" class="difficulty-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg active">
+                        Capitales
+                    </button>
+                    <button onclick="setGeographyMode('countries')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                        Países
+                    </button>
+                    <button onclick="setGeographyMode('flags')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Banderas
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Puntuación: <span id="geoScore">0</span> |
+                Pregunta: <span id="geoCurrent">1</span>/20 |
+                Tiempo: <span id="geoTimer">15</span>s
+            </div>
+            <button onclick="startGeographyGame()" class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+        </div>
+        <div class="max-w-2xl mx-auto bg-white rounded-2xl p-8">
+            <div id="geoQuestion" class="text-2xl font-bold text-center text-gray-800 mb-6">¡Presiona Iniciar para comenzar!</div>
+            <div id="geoOptions" class="grid grid-cols-2 gap-4"></div>
+        </div>
+    </div>
+
+    <!-- Juego de Puzzle 15 -->
+    <div id="puzzleGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🔢 Puzzle 15</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Tamaño -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Tamaño del Puzzle:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setPuzzleSize(3)" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                        3x3
+                    </button>
+                    <button onclick="setPuzzleSize(4)" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg active">
+                        4x4
+                    </button>
+                    <button onclick="setPuzzleSize(5)" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        5x5
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Movimientos: <span id="puzzleMoves">0</span> |
+                Tiempo: <span id="puzzleTime">00:00</span> |
+                Récord: <span id="puzzleRecord">--:--</span>
+            </div>
+            <button onclick="shufflePuzzle()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Mezclar</button>
+        </div>
+        <div id="puzzleBoard" class="grid gap-2 max-w-md mx-auto"></div>
+    </div>
+
+    <!-- Calculadora -->
+    <div id="calculatorGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧮 Calculadora Científica</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+        </div>
+        <div class="max-w-sm mx-auto bg-gray-800 rounded-2xl p-6">
+            <div id="calculatorDisplay" class="bg-black text-white text-right text-2xl p-4 rounded-lg mb-4 min-h-16 overflow-hidden">0</div>
+            <div class="grid grid-cols-4 gap-2 text-sm">
+                <!-- Fila 1 -->
+                <button onclick="clearCalculator()" class="bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg font-bold">C</button>
+                <button onclick="deleteLast()" class="bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-lg font-bold">⌫</button>
+                <button onclick="appendToDisplay('(')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">(</button>
+                <button onclick="appendToDisplay(')')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">)</button>
+                
+                <!-- Fila 2 -->
+                <button onclick="appendToDisplay('Math.sin(')" class="bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg font-bold">sin</button>
+                <button onclick="appendToDisplay('Math.cos(')" class="bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg font-bold">cos</button>
+                <button onclick="appendToDisplay('Math.tan(')" class="bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg font-bold">tan</button>
+                <button onclick="appendToDisplay('/')" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-bold">÷</button>
+                
+                <!-- Fila 3 -->
+                <button onclick="appendToDisplay('7')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">7</button>
+                <button onclick="appendToDisplay('8')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">8</button>
+                <button onclick="appendToDisplay('9')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">9</button>
+                <button onclick="appendToDisplay('*')" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-bold">×</button>
+                
+                <!-- Fila 4 -->
+                <button onclick="appendToDisplay('4')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">4</button>
+                <button onclick="appendToDisplay('5')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">5</button>
+                <button onclick="appendToDisplay('6')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">6</button>
+                <button onclick="appendToDisplay('-')" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-bold">-</button>
+                
+                <!-- Fila 5 -->
+                <button onclick="appendToDisplay('1')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">1</button>
+                <button onclick="appendToDisplay('2')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">2</button>
+                <button onclick="appendToDisplay('3')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">3</button>
+                <button onclick="appendToDisplay('+')" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-bold">+</button>
+                
+                <!-- Fila 6 -->
+                <button onclick="appendToDisplay('0')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold col-span-2">0</button>
+                <button onclick="appendToDisplay('.')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">.</button>
+                <button onclick="calculate()" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-bold">=</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cronómetro -->
+    <div id="stopwatchGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">⏱️ Cronómetro</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+        </div>
+        <div class="max-w-md mx-auto bg-gray-800 rounded-2xl p-8 text-center">
+            <div id="stopwatchDisplay" class="text-6xl font-mono text-white mb-8">00:00:00</div>
+            <div class="flex justify-center space-x-4 mb-6">
+                <button onclick="startStopwatch()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold">Iniciar</button>
+                <button onclick="pauseStopwatch()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-bold">Pausar</button>
+                <button onclick="resetStopwatch()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold">Reset</button>
+                <button onclick="lapStopwatch()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-bold">Vuelta</button>
+            </div>
+            <div id="lapTimes" class="text-white text-left max-h-40 overflow-y-auto"></div>
+        </div>
+    </div>
+
+    <!-- Juego de Tiempo de Reacción -->
+    <div id="reactionGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">⚡ Tiempo de Reacción</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <div class="text-white text-xl mb-4">
+                Mejor Tiempo: <span id="bestReaction">--- ms</span> |
+                Promedio: <span id="avgReaction">--- ms</span>
+            </div>
+            <button onclick="startReactionTest()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Test</button>
+        </div>
+        <div class="max-w-md mx-auto">
+            <div id="reactionArea" class="bg-red-500 h-64 rounded-2xl flex items-center justify-center text-white text-2xl font-bold cursor-pointer transition-colors">
+                Haz clic para comenzar
+            </div>
+            <div id="reactionResult" class="text-white text-center text-xl mt-4"></div>
+        </div>
+    </div>
+
+    <!-- Modal Personalizado -->
+    <div id="customModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div id="modalIcon" class="text-6xl mb-4">🎉</div>
+            <h3 id="modalTitle" class="text-2xl font-bold text-gray-800 mb-4">¡Título!</h3>
+            <p id="modalMessage" class="text-gray-600 mb-6">Mensaje del modal</p>
+            <div id="modalButtons" class="flex justify-center space-x-4">
+                <button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black bg-opacity-30 backdrop-blur-lg border-t border-white border-opacity-20 mt-16">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                <div class="text-center sm:text-left">
+                    <div class="flex items-center justify-center sm:justify-start space-x-3 mb-4">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" alt="GameHub Pro" class="w-8 h-8">
+                        <h3 class="text-lg sm:text-xl font-bold text-white">GameHub Pro</h3>
+                    </div>
+                    <p class="text-gray-300 text-sm sm:text-base">El mejor centro de juegos online con más de 20 juegos increíbles para toda la familia.</p>
+                </div>
+                <div class="text-center sm:text-left">
+                    <h4 class="text-base sm:text-lg font-semibold text-white mb-4">Enlaces Rápidos</h4>
+                    <ul class="space-y-2 text-gray-300 text-sm sm:text-base">
+                        <li><a href="#" class="hover:text-white transition-colors">Todos los Juegos</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Juegos Populares</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Nuevos Juegos</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Torneos</a></li>
+                    </ul>
+                </div>
+                <div class="text-center sm:text-left sm:col-span-2 lg:col-span-1">
+                    <h4 class="text-base sm:text-lg font-semibold text-white mb-4">Síguenos</h4>
+                    <div class="flex justify-center sm:justify-start space-x-4 mb-4">
+                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-400 text-xl sm:text-2xl transition-colors">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-400 text-xl sm:text-2xl transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-pink-400 text-xl sm:text-2xl transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-red-400 text-xl sm:text-2xl transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                    <p class="text-gray-300 text-xs sm:text-sm">© 2024 GameHub Pro. Todos los derechos reservados.</p>
+                </div>
+            </div>
+            <div class="border-t border-white border-opacity-20 mt-6 sm:mt-8 pt-4 text-center">
+                <p class="text-gray-400 text-xs sm:text-sm">
+                    Desarrollado por 
+                    <a href="https://rimeddigitalmarketing.web.app/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 font-semibold transition-colors">
+                        Rimed Digital
+                    </a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón Flotante de WhatsApp -->
+    <a href="https://wa.me/93593126?text=Hola,%20me%20interesa%20GameHub%20Pro" target="_blank" rel="noopener noreferrer" class="whatsapp-float">
+        <div class="bg-green-500 hover:bg-green-600 text-white p-3 sm:p-4 rounded-full shadow-lg transition-colors">
+            <i class="fab fa-whatsapp text-xl sm:text-2xl"></i>
+        </div>
+    </a>
+
+    <script>
+        // Variables globales
+        let currentGame = 'main';
+        let gameTimers = {};
+        
+        // Sistema de Modal Personalizado
+        function showModal(title, message, icon = '🎉', buttons = null) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modalIcon').textContent = icon;
+            
+            const buttonsContainer = document.getElementById('modalButtons');
+            if (buttons) {
+                buttonsContainer.innerHTML = buttons;
+            } else {
+                buttonsContainer.innerHTML = '<button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Aceptar</button>';
+            }
+            
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+        
+        // Funciones de navegación
+        function showGame(game) {
+            document.getElementById('mainPanel').classList.add('hidden');
+            document.getElementById(game + 'Game').classList.remove('hidden');
+            currentGame = game;
+            
+            // Inicializar juegos específicos
+            if (game === 'memory') initMemoryGame();
+            if (game === 'tictactoe') initTicTacToe();
+            if (game === 'quiz') initQuiz();
+            if (game === 'puzzle') initPuzzle();
+            if (game === 'snake') initSnakeGame();
+            if (game === 'tetris') initTetrisGame();
+            if (game === 'pong') initPongGame();
+            if (game === 'breakout') initBreakoutGame();
+            if (game === 'flappybird') initFlappyGame();
+            if (game === 'sudoku') initSudokuGame();
+            if (game === 'wordle') initWordleGame();
+            if (game === 'simon') initSimonGame();
+            if (game === 'connect4') initConnect4Game();
+            if (game === 'checkers') initCheckersGame();
+            if (game === 'minesweeper') initMinesweeperGame();
+            if (game === 'math') initMathGame();
+            if (game === 'typing') initTypingGame();
+            if (game === 'geography') initGeographyGame();
+            if (game === 'stopwatch') initStopwatchGame();
+            if (game === 'reaction') initReactionGame();
+        }
+        
+        function showMainPanel() {
+            document.querySelectorAll('[id$="Game"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById('mainPanel').classList.remove('hidden');
+            currentGame = 'main';
+            
+            // Limpiar timers
+            Object.values(gameTimers).forEach(timer => clearInterval(timer));
+            gameTimers = {};
+        }
+
+        // Sistema de filtros
+        function filterGames(category) {
+            const games = document.querySelectorAll('[data-category]');
+            const filters = document.querySelectorAll('.category-filter');
+            
+            // Actualizar botones de filtro
+            filters.forEach(btn => {
+                btn.classList.remove('active', 'bg-white', 'text-gray-800');
+                btn.classList.add('bg-white', 'bg-opacity-20', 'text-white');
+            });
+            
+            event.target.classList.remove('bg-white', 'bg-opacity-20', 'text-white');
+            event.target.classList.add('active', 'bg-white', 'text-gray-800');
+            
+            // Mostrar/ocultar juegos
+            games.forEach(game => {
+                if (category === 'all' || game.dataset.category === category) {
+                    game.style.display = 'block';
+                } else {
+                    game.style.display = 'none';
+                }
+            });
+        }
+
+        // Función para compartir
+        function shareWebsite() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'GameHub Pro - Centro de Juegos',
+                    text: '¡Descubre más de 20 juegos increíbles en GameHub Pro!',
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                showModal('¡Enlace Copiado!', 'El enlace ha sido copiado al portapapeles. ¡Compártelo con tus amigos!', '📋');
+            }
+        }
+
+        // JUEGO DE SNAKE MEJORADO
+        let snake = [{x: 10, y: 10}];
+        let food = {x: 15, y: 15};
+        let dx = 0;
+        let dy = 0;
+        let snakeScore = 0;
+        let snakeLevel = 1;
+        let snakeRunning = false;
+        let snakeDifficulty = 'easy';
+        let snakeSpeed = 300;
+        let snakeRecord = localStorage.getItem('snakeRecord') || 0;
+        
+        function initSnakeGame() {
+            document.getElementById('snakeRecord').textContent = snakeRecord;
+        }
+        
+        function setSnakeDifficulty(difficulty) {
+            snakeDifficulty = difficulty;
+            
+            // Actualizar botones
+            document.querySelectorAll('#snakeGame .difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Configurar velocidad
+            switch(difficulty) {
+                case 'easy': snakeSpeed = 300; break;
+                case 'medium': snakeSpeed = 200; break;
+                case 'hard': snakeSpeed = 100; break;
+            }
+        }
+        
+        function startSnakeGame() {
+            snake = [{x: 10, y: 10}];
+            food = {x: 15, y: 15};
+            dx = 0;
+            dy = 0;
+            snakeScore = 0;
+            snakeLevel = 1;
+            snakeRunning = true;
+            
+            document.getElementById('snakeScore').textContent = snakeScore;
+            document.getElementById('snakeLevel').textContent = snakeLevel;
+            
+            const board = document.getElementById('snakeBoard');
+            board.innerHTML = '';
+            board.style.display = 'grid';
+            board.style.gridTemplateColumns = 'repeat(20, 1fr)';
+            board.style.gridTemplateRows = 'repeat(20, 1fr)';
+            
+            for (let i = 0; i < 400; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'snake-cell bg-gray-800';
+                board.appendChild(cell);
+            }
+            
+            generateFood();
+            updateSnakeBoard();
+            gameLoop();
+        }
+        
+        function updateSnakeBoard() {
+            const cells = document.getElementById('snakeBoard').children;
+            
+            // Limpiar tablero
+            for (let cell of cells) {
+                cell.className = 'snake-cell bg-gray-800';
+            }
+            
+            // Dibujar serpiente
+            snake.forEach((segment, index) => {
+                const cellIndex = segment.y * 20 + segment.x;
+                if (cells[cellIndex]) {
+                    cells[cellIndex].className = index === 0 ? 'snake-cell bg-green-400' : 'snake-cell snake';
+                }
+            });
+            
+            // Dibujar comida
+            const foodIndex = food.y * 20 + food.x;
+            if (cells[foodIndex]) cells[foodIndex].className = 'snake-cell food';
+        }
+        
+        function gameLoop() {
+            if (!snakeRunning) return;
+            
+            setTimeout(() => {
+                if (dx !== 0 || dy !== 0) { // Solo mover si hay dirección
+                    if (!moveSnake()) {
+                        return; // Terminar si hay colisión
+                    }
+                    updateSnakeBoard();
+                }
+                gameLoop();
+            }, snakeSpeed);
+        }
+        
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            
+            // Verificar colisiones con paredes
+            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
+                endSnakeGame();
+                return false;
+            }
+            
+            // Verificar colisiones consigo mismo
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                endSnakeGame();
+                return false;
+            }
+            
+            snake.unshift(head);
+            
+            // Verificar si comió
+            if (head.x === food.x && head.y === food.y) {
+                snakeScore += 10;
+                document.getElementById('snakeScore').textContent = snakeScore;
+                
+                // Subir de nivel cada 50 puntos
+                if (snakeScore % 50 === 0) {
+                    snakeLevel++;
+                    document.getElementById('snakeLevel').textContent = snakeLevel;
+                    snakeSpeed = Math.max(50, snakeSpeed - 20); // Aumentar velocidad
+                }
+                
+                generateFood();
+            } else {
+                snake.pop();
+            }
+            
+            return true; // Movimiento exitoso
+        }
+        
+        function generateFood() {
+            do {
+                food = {
+                    x: Math.floor(Math.random() * 20),
+                    y: Math.floor(Math.random() * 20)
+                };
+            } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+        }
+        
+        function endSnakeGame() {
+            snakeRunning = false;
+            
+            // Actualizar récord
+            if (snakeScore > snakeRecord) {
+                snakeRecord = snakeScore;
+                localStorage.setItem('snakeRecord', snakeRecord);
+                document.getElementById('snakeRecord').textContent = snakeRecord;
+                showModal('¡Nuevo Récord!', `¡Felicidades! Has establecido un nuevo récord con ${snakeScore} puntos.`, '🏆');
+            } else {
+                showModal('Juego Terminado', `Puntuación final: ${snakeScore} puntos. Nivel alcanzado: ${snakeLevel}`, '🐍');
+            }
+        }
+
+        // JUEGO DE TETRIS
+        let tetrisBoard = Array(20).fill().map(() => Array(10).fill(0));
+        let tetrisScore = 0;
+        let tetrisLevel = 1;
+        let tetrisLines = 0;
+        let tetrisRunning = false;
+        let currentPiece = null;
+        let nextPiece = null;
+        let tetrisSpeed = 1000;
+        
+        const tetrisPieces = [
+            { shape: [[1,1,1,1]], color: 'tetris-I' }, // I
+            { shape: [[1,1],[1,1]], color: 'tetris-O' }, // O
+            { shape: [[0,1,0],[1,1,1]], color: 'tetris-T' }, // T
+            { shape: [[0,1,1],[1,1,0]], color: 'tetris-S' }, // S
+            { shape: [[1,1,0],[0,1,1]], color: 'tetris-Z' }, // Z
+            { shape: [[1,0,0],[1,1,1]], color: 'tetris-J' }, // J
+            { shape: [[0,0,1],[1,1,1]], color: 'tetris-L' }  // L
+        ];
+        
+        function initTetrisGame() {
+            // Inicialización del Tetris
+        }
+        
+        function startTetrisGame() {
+            tetrisBoard = Array(20).fill().map(() => Array(10).fill(0));
+            tetrisScore = 0;
+            tetrisLevel = 1;
+            tetrisLines = 0;
+            tetrisRunning = true;
+            tetrisSpeed = 1000;
+            
+            document.getElementById('tetrisScore').textContent = tetrisScore;
+            document.getElementById('tetrisLevel').textContent = tetrisLevel;
+            document.getElementById('tetrisLines').textContent = tetrisLines;
+            
+            currentPiece = createTetrisPiece();
+            nextPiece = createTetrisPiece();
+            
+            renderTetrisBoard();
+            tetrisGameLoop();
+        }
+        
+        function createTetrisPiece() {
+            const piece = tetrisPieces[Math.floor(Math.random() * tetrisPieces.length)];
+            return {
+                shape: piece.shape,
+                color: piece.color,
+                x: Math.floor(10 / 2) - Math.floor(piece.shape[0].length / 2),
+                y: 0
+            };
+        }
+        
+        function renderTetrisBoard() {
+            const board = document.getElementById('tetrisBoard');
+            board.innerHTML = '';
+            
+            // Crear tablero visual
+            for (let y = 0; y < 20; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'absolute border border-gray-600';
+                    cell.style.left = (x * 30) + 'px';
+                    cell.style.top = (y * 30) + 'px';
+                    cell.style.width = '30px';
+                    cell.style.height = '30px';
+                    
+                    if (tetrisBoard[y][x]) {
+                        cell.classList.add(tetrisBoard[y][x]);
+                    }
+                    
+                    board.appendChild(cell);
+                }
+            }
+            
+            // Dibujar pieza actual
+            if (currentPiece) {
+                drawTetrisPiece(currentPiece);
+            }
+        }
+        
+        function drawTetrisPiece(piece) {
+            const board = document.getElementById('tetrisBoard');
+            
+            for (let y = 0; y < piece.shape.length; y++) {
+                for (let x = 0; x < piece.shape[y].length; x++) {
+                    if (piece.shape[y][x]) {
+                        const cellIndex = (piece.y + y) * 10 + (piece.x + x);
+                        if (board.children[cellIndex]) {
+                            board.children[cellIndex].classList.add(piece.color);
+                        }
+                    }
+                }
+            }
+        }
+        
+        function tetrisGameLoop() {
+            if (!tetrisRunning) return;
+            
+            if (!moveTetrisPiece(0, 1)) {
+                placeTetrisPiece();
+                clearTetrisLines();
+                currentPiece = nextPiece;
+                nextPiece = createTetrisPiece();
+                
+                if (!isValidTetrisMove(currentPiece, 0, 0)) {
+                    endTetrisGame();
+                    return;
+                }
+            }
+            
+            renderTetrisBoard();
+            setTimeout(tetrisGameLoop, tetrisSpeed);
+        }
+        
+        function moveTetrisPiece(dx, dy) {
+            if (isValidTetrisMove(currentPiece, dx, dy)) {
+                currentPiece.x += dx;
+                currentPiece.y += dy;
+                return true;
+            }
+            return false;
+        }
+        
+        function rotateTetrisPiece() {
+            const rotated = {
+                ...currentPiece,
+                shape: currentPiece.shape[0].map((_, i) => 
+                    currentPiece.shape.map(row => row[i]).reverse()
+                )
+            };
+            
+            if (isValidTetrisMove(rotated, 0, 0)) {
+                currentPiece.shape = rotated.shape;
+                renderTetrisBoard();
+            }
+        }
+        
+        function isValidTetrisMove(piece, dx, dy) {
+            for (let y = 0; y < piece.shape.length; y++) {
+                for (let x = 0; x < piece.shape[y].length; x++) {
+                    if (piece.shape[y][x]) {
+                        const newX = piece.x + x + dx;
+                        const newY = piece.y + y + dy;
+                        
+                        if (newX < 0 || newX >= 10 || newY >= 20 || 
+                            (newY >= 0 && tetrisBoard[newY][newX])) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+        
+        function placeTetrisPiece() {
+            for (let y = 0; y < currentPiece.shape.length; y++) {
+                for (let x = 0; x < currentPiece.shape[y].length; x++) {
+                    if (currentPiece.shape[y][x]) {
+                        const boardY = currentPiece.y + y;
+                        const boardX = currentPiece.x + x;
+                        if (boardY >= 0) {
+                            tetrisBoard[boardY][boardX] = currentPiece.color;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function clearTetrisLines() {
+            let linesCleared = 0;
+            
+            for (let y = tetrisBoard.length - 1; y >= 0; y--) {
+                if (tetrisBoard[y].every(cell => cell !== 0)) {
+                    tetrisBoard.splice(y, 1);
+                    tetrisBoard.unshift(Array(10).fill(0));
+                    linesCleared++;
+                    y++; // Revisar la misma línea de nuevo
+                }
+            }
+            
+            if (linesCleared > 0) {
+                tetrisLines += linesCleared;
+                tetrisScore += linesCleared * 100 * tetrisLevel;
+                
+                // Subir de nivel cada 10 líneas
+                if (tetrisLines >= tetrisLevel * 10) {
+                    tetrisLevel++;
+                    tetrisSpeed = Math.max(100, tetrisSpeed - 100);
+                }
+                
+                document.getElementById('tetrisScore').textContent = tetrisScore;
+                document.getElementById('tetrisLevel').textContent = tetrisLevel;
+                document.getElementById('tetrisLines').textContent = tetrisLines;
+            }
+        }
+        
+        function endTetrisGame() {
+            tetrisRunning = false;
+            showModal('Juego Terminado', `Puntuación final: ${tetrisScore} puntos. Líneas completadas: ${tetrisLines}`, '🧱');
+        }
+
+        // JUEGO DE PONG
+        let pongRunning = false;
+        let pongDifficulty = 'easy';
+        let playerScore = 0;
+        let aiScore = 0;
+        let pongBall = { x: 300, y: 200, dx: 5, dy: 3 };
+        let playerPaddle = { y: 160 };
+        let aiPaddle = { y: 160 };
+        let pongSpeed = { easy: 0.3, medium: 0.6, hard: 0.9 };
+        
+        function initPongGame() {
+            // Inicialización del Pong
+        }
+        
+        function setPongDifficulty(difficulty) {
+            pongDifficulty = difficulty;
+            
+            document.querySelectorAll('#pongGame .difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function startPongGame() {
+            pongRunning = true;
+            playerScore = 0;
+            aiScore = 0;
+            pongBall = { x: 300, y: 200, dx: 5, dy: 3 };
+            playerPaddle = { y: 160 };
+            aiPaddle = { y: 160 };
+            
+            document.getElementById('playerScore').textContent = playerScore;
+            document.getElementById('aiScore').textContent = aiScore;
+            
+            pongGameLoop();
+        }
+        
+        function pongGameLoop() {
+            if (!pongRunning) return;
+            
+            // Mover pelota
+            pongBall.x += pongBall.dx;
+            pongBall.y += pongBall.dy;
+            
+            // Rebote en paredes superior e inferior
+            if (pongBall.y <= 0 || pongBall.y >= 385) {
+                pongBall.dy = -pongBall.dy;
+            }
+            
+            // Colisión con paleta del jugador
+            if (pongBall.x <= 35 && pongBall.y >= playerPaddle.y && pongBall.y <= playerPaddle.y + 80) {
+                pongBall.dx = -pongBall.dx;
+                pongBall.dy += (pongBall.y - (playerPaddle.y + 40)) * 0.1;
+            }
+            
+            // Colisión con paleta de la IA
+            if (pongBall.x >= 555 && pongBall.y >= aiPaddle.y && pongBall.y <= aiPaddle.y + 80) {
+                pongBall.dx = -pongBall.dx;
+                pongBall.dy += (pongBall.y - (aiPaddle.y + 40)) * 0.1;
+            }
+            
+            // Puntuación
+            if (pongBall.x < 0) {
+                aiScore++;
+                resetPongBall();
+            } else if (pongBall.x > 600) {
+                playerScore++;
+                resetPongBall();
+            }
+            
+            // IA
+            const aiSpeed = pongSpeed[pongDifficulty];
+            const ballCenter = pongBall.y;
+            const paddleCenter = aiPaddle.y + 40;
+            
+            if (ballCenter < paddleCenter - 10) {
+                aiPaddle.y -= aiSpeed * 10;
+            } else if (ballCenter > paddleCenter + 10) {
+                aiPaddle.y += aiSpeed * 10;
+            }
+            
+            // Limitar paletas
+            playerPaddle.y = Math.max(0, Math.min(320, playerPaddle.y));
+            aiPaddle.y = Math.max(0, Math.min(320, aiPaddle.y));
+            
+            // Actualizar posiciones
+            document.getElementById('playerPaddle').style.top = playerPaddle.y + 'px';
+            document.getElementById('aiPaddle').style.top = aiPaddle.y + 'px';
+            document.getElementById('pongBall').style.left = pongBall.x + 'px';
+            document.getElementById('pongBall').style.top = pongBall.y + 'px';
+            
+            document.getElementById('playerScore').textContent = playerScore;
+            document.getElementById('aiScore').textContent = aiScore;
+            
+            // Verificar ganador
+            if (playerScore >= 5) {
+                pongRunning = false;
+                showModal('¡Victoria!', '¡Has ganado el partido!', '🏆');
+            } else if (aiScore >= 5) {
+                pongRunning = false;
+                showModal('Derrota', 'La IA ha ganado el partido.', '🤖');
+            }
+            
+            if (pongRunning) {
+                requestAnimationFrame(pongGameLoop);
+            }
+        }
+        
+        function resetPongBall() {
+            pongBall.x = 300;
+            pongBall.y = 200;
+            pongBall.dx = -pongBall.dx;
+            pongBall.dy = (Math.random() - 0.5) * 6;
+        }
+
+        // JUEGO DE BREAKOUT
+        let breakoutRunning = false;
+        let breakoutScore = 0;
+        let breakoutLives = 3;
+        let breakoutLevel = 1;
+        let breakoutBall = { x: 300, y: 450, dx: 4, dy: -4 };
+        let breakoutPaddle = { x: 250, width: 100 };
+        let breakoutBricks = [];
+        
+        function initBreakoutGame() {
+            createBreakoutBricks();
+        }
+        
+        function createBreakoutBricks() {
+            breakoutBricks = [];
+            const colors = ['brick-red', 'brick-orange', 'brick-yellow', 'brick-green', 'brick-blue'];
+            
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 10; col++) {
+                    breakoutBricks.push({
+                        x: col * 58 + 10,
+                        y: row * 25 + 50,
+                        width: 55,
+                        height: 20,
+                        color: colors[row],
+                        visible: true
+                    });
+                }
+            }
+        }
+        
+        function startBreakoutGame() {
+            breakoutRunning = true;
+            breakoutScore = 0;
+            breakoutLives = 3;
+            breakoutLevel = 1;
+            breakoutBall = { x: 300, y: 450, dx: 4, dy: -4 };
+            breakoutPaddle = { x: 250, width: 100 };
+            
+            createBreakoutBricks();
+            renderBreakoutBricks();
+            
+            document.getElementById('breakoutScore').textContent = breakoutScore;
+            document.getElementById('breakoutLives').textContent = breakoutLives;
+            document.getElementById('breakoutLevel').textContent = breakoutLevel;
+            
+            breakoutGameLoop();
+        }
+        
+        function renderBreakoutBricks() {
+            const board = document.getElementById('breakoutBoard');
+            
+            // Limpiar ladrillos existentes
+            board.querySelectorAll('.breakout-brick').forEach(brick => brick.remove());
+            
+            // Crear ladrillos
+            breakoutBricks.forEach(brick => {
+                if (brick.visible) {
+                    const brickElement = document.createElement('div');
+                    brickElement.className = `breakout-brick ${brick.color} absolute`;
+                    brickElement.style.left = brick.x + 'px';
+                    brickElement.style.top = brick.y + 'px';
+                    brickElement.style.width = brick.width + 'px';
+                    brickElement.style.height = brick.height + 'px';
+                    board.appendChild(brickElement);
+                }
+            });
+        }
+        
+        function breakoutGameLoop() {
+            if (!breakoutRunning) return;
+            
+            // Mover pelota
+            breakoutBall.x += breakoutBall.dx;
+            breakoutBall.y += breakoutBall.dy;
+            
+            // Rebote en paredes
+            if (breakoutBall.x <= 0 || breakoutBall.x >= 585) {
+                breakoutBall.dx = -breakoutBall.dx;
+            }
+            if (breakoutBall.y <= 0) {
+                breakoutBall.dy = -breakoutBall.dy;
+            }
+            
+            // Colisión con paleta
+            if (breakoutBall.y >= 435 && breakoutBall.y <= 450 &&
+                breakoutBall.x >= breakoutPaddle.x && breakoutBall.x <= breakoutPaddle.x + breakoutPaddle.width) {
+                breakoutBall.dy = -breakoutBall.dy;
+                // Añadir efecto según donde golpee la paleta
+                const hitPos = (breakoutBall.x - breakoutPaddle.x) / breakoutPaddle.width;
+                breakoutBall.dx = (hitPos - 0.5) * 8;
+            }
+            
+            // Colisión con ladrillos
+            breakoutBricks.forEach(brick => {
+                if (brick.visible &&
+                    breakoutBall.x >= brick.x && breakoutBall.x <= brick.x + brick.width &&
+                    breakoutBall.y >= brick.y && breakoutBall.y <= brick.y + brick.height) {
+                    brick.visible = false;
+                    breakoutBall.dy = -breakoutBall.dy;
+                    breakoutScore += 10;
+                    document.getElementById('breakoutScore').textContent = breakoutScore;
+                }
+            });
+            
+            // Verificar si quedan ladrillos
+            if (breakoutBricks.every(brick => !brick.visible)) {
+                breakoutLevel++;
+                document.getElementById('breakoutLevel').textContent = breakoutLevel;
+                createBreakoutBricks();
+                breakoutBall.dx *= 1.1;
+                breakoutBall.dy *= 1.1;
+            }
+            
+            // Perder vida
+            if (breakoutBall.y > 500) {
+                breakoutLives--;
+                document.getElementById('breakoutLives').textContent = breakoutLives;
+                
+                if (breakoutLives <= 0) {
+                    breakoutRunning = false;
+                    showModal('Juego Terminado', `Puntuación final: ${breakoutScore} puntos. Nivel alcanzado: ${breakoutLevel}`, '🎯');
+                } else {
+                    breakoutBall = { x: 300, y: 450, dx: 4, dy: -4 };
+                }
+            }
+            
+            // Actualizar posiciones
+            document.getElementById('breakoutPaddle').style.left = breakoutPaddle.x + 'px';
+            document.getElementById('breakoutBall').style.left = breakoutBall.x + 'px';
+            document.getElementById('breakoutBall').style.top = breakoutBall.y + 'px';
+            
+            renderBreakoutBricks();
+            
+            if (breakoutRunning) {
+                requestAnimationFrame(breakoutGameLoop);
+            }
+        }
+
+        // JUEGO DE FLAPPY BIRD
+        let flappyRunning = false;
+        let flappyScore = 0;
+        let flappyBest = localStorage.getItem('flappyBest') || 0;
+        let flappyBird = { y: 285, velocity: 0 };
+        let flappyPipes = [];
+        let flappyGravity = 0.5;
+        let flappyJump = -10;
+        
+        function initFlappyGame() {
+            document.getElementById('flappyBest').textContent = flappyBest;
+        }
+        
+        function startFlappyGame() {
+            flappyRunning = true;
+            flappyScore = 0;
+            flappyBird = { y: 285, velocity: 0 };
+            flappyPipes = [];
+            
+            document.getElementById('flappyScore').textContent = flappyScore;
+            document.getElementById('flappyBird').style.top = flappyBird.y + 'px';
+            
+            // Crear primer par de tuberías
+            createFlappyPipe();
+            
+            flappyGameLoop();
+        }
+        <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'982798bc606cb4fc',t:'MTc1ODQzNzA5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
