@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameHub Pro - Centro de Juegos Premium</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .game-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .game-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        
+        .category-arcade { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .category-puzzle { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .category-strategy { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .category-educational { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .category-tools { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .category-action { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        
+        .hidden { display: none !important; }
+        
+        .modal {
+            backdrop-filter: blur(10px);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .carousel-container {
+            overflow: hidden;
+        }
+        
+        .carousel-track {
+            display: flex;
+            animation: scroll 20s linear infinite;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+        
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        
+        .snake-cell {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #333;
+        }
+        
+        .snake { background-color: #4ade80; border-radius: 2px; }
+        .food { background-color: #ef4444; border-radius: 50%; }
+        
+        .memory-card {
+            perspective: 1000px;
+        }
+        
+        .memory-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .memory-card.flipped .memory-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .memory-card-front, .memory-card-back {
+            backface-visibility: hidden;
+        }
+        
+        .memory-card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .difficulty-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .difficulty-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        
+        .level-indicator {
+            background: linear-gradient(90deg, #10b981, #3b82f6, #8b5cf6);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <!-- Header -->
+    <header class="bg-black bg-opacity-20 backdrop-blur-lg border-b border-white border-opacity-20">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" alt="GameHub Pro Logo" class="w-10 h-10">
+                <h1 class="text-2xl font-bold text-white">GameHub Pro</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="shareWebsite()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Compartir</span>
+                </button>
+                <div class="flex space-x-2">
+                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-white hover:text-blue-400 text-xl transition-colors">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-white hover:text-blue-400 text-xl transition-colors">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-white hover:text-pink-400 text-xl transition-colors">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Carrusel de Promociones -->
+    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 py-3">
+        <div class="carousel-container">
+            <div class="carousel-track">
+                <div class="flex space-x-8 text-white font-semibold whitespace-nowrap">
+                    <span>🎮 ¡Nuevo juego Tetris disponible! Pruébalo ahora</span>
+                    <span>🏆 Compite en el torneo semanal de Snake</span>
+                    <span>🎯 Mejora tu puntuación en Memory y gana premios</span>
+                    <span>🧩 Resuelve puzzles y desbloquea niveles especiales</span>
+                    <span>⭐ ¡Más de 15 juegos disponibles para ti!</span>
+                    <span>🎮 ¡Nuevo juego Tetris disponible! Pruébalo ahora</span>
+                    <span>🏆 Compite en el torneo semanal de Snake</span>
+                    <span>🧩 Resuelve puzzles y desbloquea niveles especiales</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Principal -->
+    <div id="mainPanel" class="container mx-auto px-4 py-8">
+        <div class="text-center mb-12">
+            <h2 class="text-5xl font-bold text-white mb-4">🎮 Centro de Juegos Premium</h2>
+            <p class="text-xl text-gray-300">¡Más de 15 juegos increíbles te esperan!</p>
+        </div>
+        
+        <!-- Categorías -->
+        <div class="mb-8">
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <button onclick="filterGames('all')" class="category-filter bg-white text-gray-800 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition-colors active">
+                    Todos los Juegos
+                </button>
+                <button onclick="filterGames('arcade')" class="category-filter bg-white bg-opacity-20 text-white px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors">
+                    Arcade
+                </button>
+                <button onclick="filterGames('puzzle')" class="category-filter bg-white bg-opacity-20 text-white px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors">
+                    Puzzle
+                </button>
+                <button onclick="filterGames('strategy')" class="category-filter bg-white bg-opacity-20 text-white px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors">
+                    Estrategia
+                </button>
+                <button onclick="filterGames('educational')" class="category-filter bg-white bg-opacity-20 text-white px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors">
+                    Educativo
+                </button>
+                <button onclick="filterGames('tools')" class="category-filter bg-white bg-opacity-20 text-white px-6 py-2 rounded-full font-semibold hover:bg-opacity-30 transition-colors">
+                    Herramientas
+                </button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto" id="gamesGrid">
+            <!-- Juegos Arcade -->
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('snake')">
+                <div class="text-5xl mb-3">🐍</div>
+                <h3 class="text-xl font-bold mb-2">Snake</h3>
+                <p class="text-sm opacity-90">Come y crece sin chocar</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('tetris')">
+                <div class="text-5xl mb-3">🧱</div>
+                <h3 class="text-xl font-bold mb-2">Tetris</h3>
+                <p class="text-sm opacity-90">Completa líneas y sube de nivel</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>5 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('pong')">
+                <div class="text-5xl mb-3">🏓</div>
+                <h3 class="text-xl font-bold mb-2">Pong</h3>
+                <p class="text-sm opacity-90">Clásico juego de ping pong</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-arcade rounded-2xl p-6 text-white cursor-pointer" data-category="arcade" onclick="showGame('breakout')">
+                <div class="text-5xl mb-3">🎯</div>
+                <h3 class="text-xl font-bold mb-2">Breakout</h3>
+                <p class="text-sm opacity-90">Rompe todos los bloques</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>4 Niveles</span>
+                </div>
+            </div>
+
+            <!-- Juegos Puzzle -->
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('memory')">
+                <div class="text-5xl mb-3">🧠</div>
+                <h3 class="text-xl font-bold mb-2">Memoria</h3>
+                <p class="text-sm opacity-90">Encuentra las parejas</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>4 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('puzzle')">
+                <div class="text-5xl mb-3">🔢</div>
+                <h3 class="text-xl font-bold mb-2">Puzzle 15</h3>
+                <p class="text-sm opacity-90">Ordena los números</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('sudoku')">
+                <div class="text-5xl mb-3">🔢</div>
+                <h3 class="text-xl font-bold mb-2">Sudoku</h3>
+                <p class="text-sm opacity-90">Completa la cuadrícula</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-puzzle rounded-2xl p-6 text-white cursor-pointer" data-category="puzzle" onclick="showGame('wordle')">
+                <div class="text-5xl mb-3">📝</div>
+                <h3 class="text-xl font-bold mb-2">Wordle</h3>
+                <p class="text-sm opacity-90">Adivina la palabra</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>Diario</span>
+                </div>
+            </div>
+
+            <!-- Juegos Estrategia -->
+            <div class="game-card category-strategy rounded-2xl p-6 text-white cursor-pointer" data-category="strategy" onclick="showGame('tictactoe')">
+                <div class="text-5xl mb-3">⭕</div>
+                <h3 class="text-xl font-bold mb-2">Tres en Raya</h3>
+                <p class="text-sm opacity-90">Estrategia clásica</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles IA</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-strategy rounded-2xl p-6 text-white cursor-pointer" data-category="strategy" onclick="showGame('chess')">
+                <div class="text-5xl mb-3">♟️</div>
+                <h3 class="text-xl font-bold mb-2">Ajedrez</h3>
+                <p class="text-sm opacity-90">El juego de reyes</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>5 Niveles IA</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-strategy rounded-2xl p-6 text-white cursor-pointer" data-category="strategy" onclick="showGame('checkers')">
+                <div class="text-5xl mb-3">🔴</div>
+                <h3 class="text-xl font-bold mb-2">Damas</h3>
+                <p class="text-sm opacity-90">Captura todas las piezas</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>3 Niveles IA</span>
+                </div>
+            </div>
+
+            <!-- Juegos Educativos -->
+            <div class="game-card category-educational rounded-2xl p-6 text-white cursor-pointer" data-category="educational" onclick="showGame('quiz')">
+                <div class="text-5xl mb-3">🧩</div>
+                <h3 class="text-xl font-bold mb-2">Quiz</h3>
+                <p class="text-sm opacity-90">Pon a prueba tus conocimientos</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>5 Categorías</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-educational rounded-2xl p-6 text-white cursor-pointer" data-category="educational" onclick="showGame('math')">
+                <div class="text-5xl mb-3">➕</div>
+                <h3 class="text-xl font-bold mb-2">Matemáticas</h3>
+                <p class="text-sm opacity-90">Practica operaciones</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>4 Niveles</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-educational rounded-2xl p-6 text-white cursor-pointer" data-category="educational" onclick="showGame('typing')">
+                <div class="text-5xl mb-3">⌨️</div>
+                <h3 class="text-xl font-bold mb-2">Mecanografía</h3>
+                <p class="text-sm opacity-90">Mejora tu velocidad</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>5 Niveles</span>
+                </div>
+            </div>
+
+            <!-- Herramientas -->
+            <div class="game-card category-tools rounded-2xl p-6 text-white cursor-pointer" data-category="tools" onclick="showGame('calculator')">
+                <div class="text-5xl mb-3">🧮</div>
+                <h3 class="text-xl font-bold mb-2">Calculadora</h3>
+                <p class="text-sm opacity-90">Herramienta matemática</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>Científica</span>
+                </div>
+            </div>
+            
+            <div class="game-card category-tools rounded-2xl p-6 text-white cursor-pointer" data-category="tools" onclick="showGame('stopwatch')">
+                <div class="text-5xl mb-3">⏱️</div>
+                <h3 class="text-xl font-bold mb-2">Cronómetro</h3>
+                <p class="text-sm opacity-90">Mide el tiempo</p>
+                <div class="mt-3 flex items-center text-xs">
+                    <i class="fas fa-star text-yellow-300 mr-1"></i>
+                    <span>Precisión</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Juego de Snake -->
+    <div id="snakeGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🐍 Snake</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Dificultad -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Selecciona la Dificultad:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setSnakeDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Fácil
+                    </button>
+                    <button onclick="setSnakeDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Medio
+                    </button>
+                    <button onclick="setSnakeDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Difícil
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Puntuación: <span id="snakeScore">0</span> | 
+                Nivel: <span id="snakeLevel">1</span> |
+                Récord: <span id="snakeRecord">0</span>
+            </div>
+            <button onclick="startSnakeGame()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg mb-4">Iniciar Juego</button>
+            <div class="text-white mb-4">Usa WASD o las flechas del teclado para moverte</div>
+        </div>
+        <div id="snakeBoard" class="mx-auto bg-gray-900 border-4 border-white rounded-lg" style="width: 400px; height: 400px;"></div>
+    </div>
+
+    <!-- Juego de Memoria -->
+    <div id="memoryGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧠 Juego de Memoria</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Dificultad -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Selecciona la Dificultad:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setMemoryDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        4x4 (Fácil)
+                    </button>
+                    <button onclick="setMemoryDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        6x6 (Medio)
+                    </button>
+                    <button onclick="setMemoryDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        8x8 (Difícil)
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Movimientos: <span id="memoryMoves">0</span> | 
+                Parejas: <span id="memoryPairs">0</span>/<span id="memoryTotal">8</span> |
+                Tiempo: <span id="memoryTime">00:00</span>
+            </div>
+            <button onclick="resetMemoryGame()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Nuevo Juego</button>
+        </div>
+        <div id="memoryBoard" class="grid gap-4 max-w-2xl mx-auto"></div>
+    </div>
+
+    <!-- Juego de Tres en Raya -->
+    <div id="tictactoeGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">⭕ Tres en Raya</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Dificultad IA -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Dificultad de la IA:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setTicTacToeDifficulty('easy')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg active">
+                        Fácil
+                    </button>
+                    <button onclick="setTicTacToeDifficulty('medium')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Medio
+                    </button>
+                    <button onclick="setTicTacToeDifficulty('hard')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Imposible
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4" id="tictactoeStatus">Turno del Jugador X</div>
+            <div class="text-white mb-4">
+                Victorias: <span id="playerWins">0</span> | 
+                Empates: <span id="draws">0</span> | 
+                Derrotas: <span id="aiWins">0</span>
+            </div>
+            <button onclick="resetTicTacToe()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Nuevo Juego</button>
+        </div>
+        <div id="tictactoeBoard" class="grid grid-cols-3 gap-2 max-w-xs mx-auto"></div>
+    </div>
+
+    <!-- Juego de Quiz -->
+    <div id="quizGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧩 Quiz</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Categoría -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Selecciona una Categoría:</h3>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="setQuizCategory('general')" class="difficulty-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg active">
+                        General
+                    </button>
+                    <button onclick="setQuizCategory('science')" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                        Ciencia
+                    </button>
+                    <button onclick="setQuizCategory('history')" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        Historia
+                    </button>
+                    <button onclick="setQuizCategory('sports')" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        Deportes
+                    </button>
+                    <button onclick="setQuizCategory('geography')" class="difficulty-btn bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg">
+                        Geografía
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Pregunta <span id="quizCurrent">1</span> de <span id="quizTotal">10</span> | 
+                Puntos: <span id="quizScore">0</span> |
+                Tiempo: <span id="quizTimer">30</span>s
+            </div>
+        </div>
+        <div class="max-w-2xl mx-auto bg-white rounded-2xl p-8">
+            <div id="quizQuestion" class="text-2xl font-bold text-gray-800 mb-6"></div>
+            <div id="quizOptions" class="space-y-4"></div>
+            <button id="quizNext" onclick="nextQuestion()" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mt-6">Siguiente</button>
+        </div>
+    </div>
+
+    <!-- Juego de Puzzle 15 -->
+    <div id="puzzleGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🔢 Puzzle 15</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+            
+            <!-- Selector de Tamaño -->
+            <div class="mb-6">
+                <h3 class="text-white text-lg mb-3">Tamaño del Puzzle:</h3>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="setPuzzleSize(3)" class="difficulty-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                        3x3
+                    </button>
+                    <button onclick="setPuzzleSize(4)" class="difficulty-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg active">
+                        4x4
+                    </button>
+                    <button onclick="setPuzzleSize(5)" class="difficulty-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+                        5x5
+                    </button>
+                </div>
+            </div>
+            
+            <div class="text-white text-xl mb-4">
+                Movimientos: <span id="puzzleMoves">0</span> |
+                Tiempo: <span id="puzzleTime">00:00</span> |
+                Récord: <span id="puzzleRecord">--:--</span>
+            </div>
+            <button onclick="shufflePuzzle()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg mb-4">Mezclar</button>
+        </div>
+        <div id="puzzleBoard" class="grid gap-2 max-w-md mx-auto"></div>
+    </div>
+
+    <!-- Calculadora -->
+    <div id="calculatorGame" class="hidden container mx-auto px-4 py-8">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-white mb-4">🧮 Calculadora Científica</h2>
+            <button onclick="showMainPanel()" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mb-4">← Volver</button>
+        </div>
+        <div class="max-w-sm mx-auto bg-gray-800 rounded-2xl p-6">
+            <div id="calculatorDisplay" class="bg-black text-white text-right text-2xl p-4 rounded-lg mb-4 min-h-16 overflow-hidden">0</div>
+            <div class="grid grid-cols-4 gap-2 text-sm">
+                <!-- Fila 1 -->
+                <button onclick="clearCalculator()" class="bg-red-500 hover:bg-red-600 text-white p-3 rounded-lg font-bold">C</button>
+                <button onclick="deleteLast()" class="bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-lg font-bold">⌫</button>
+                <button onclick="appendToDisplay('(')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">(</button>
+                <button onclick="appendToDisplay(')')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">)</button>
+                
+                <!-- Fila 2 -->
+                <button onclick="appendToDisplay('Math.sin(')" class="bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg font-bold">sin</button>
+                <button onclick="appendToDisplay('Math.cos(')" class="bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg font-bold">cos</button>
+                <button onclick="appendToDisplay('Math.tan(')" class="bg-purple-500 hover:bg-purple-600 text-white p-3 rounded-lg font-bold">tan</button>
+                <button onclick="appendToDisplay('/')" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-bold">÷</button>
+                
+                <!-- Fila 3 -->
+                <button onclick="appendToDisplay('7')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">7</button>
+                <button onclick="appendToDisplay('8')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">8</button>
+                <button onclick="appendToDisplay('9')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">9</button>
+                <button onclick="appendToDisplay('*')" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-bold">×</button>
+                
+                <!-- Fila 4 -->
+                <button onclick="appendToDisplay('4')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">4</button>
+                <button onclick="appendToDisplay('5')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">5</button>
+                <button onclick="appendToDisplay('6')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">6</button>
+                <button onclick="appendToDisplay('-')" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-bold">-</button>
+                
+                <!-- Fila 5 -->
+                <button onclick="appendToDisplay('1')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">1</button>
+                <button onclick="appendToDisplay('2')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">2</button>
+                <button onclick="appendToDisplay('3')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">3</button>
+                <button onclick="appendToDisplay('+')" class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-lg font-bold">+</button>
+                
+                <!-- Fila 6 -->
+                <button onclick="appendToDisplay('0')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold col-span-2">0</button>
+                <button onclick="appendToDisplay('.')" class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-lg font-bold">.</button>
+                <button onclick="calculate()" class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-bold">=</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Personalizado -->
+    <div id="customModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 modal">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div id="modalIcon" class="text-6xl mb-4">🎉</div>
+            <h3 id="modalTitle" class="text-2xl font-bold text-gray-800 mb-4">¡Título!</h3>
+            <p id="modalMessage" class="text-gray-600 mb-6">Mensaje del modal</p>
+            <div id="modalButtons" class="flex justify-center space-x-4">
+                <button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
+                    Aceptar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black bg-opacity-30 backdrop-blur-lg border-t border-white border-opacity-20 mt-16">
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <img src="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" alt="GameHub Pro" class="w-8 h-8">
+                        <h3 class="text-xl font-bold text-white">GameHub Pro</h3>
+                    </div>
+                    <p class="text-gray-300">El mejor centro de juegos online con más de 15 juegos increíbles para toda la familia.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Enlaces Rápidos</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#" class="hover:text-white transition-colors">Todos los Juegos</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Juegos Populares</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Nuevos Juegos</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Torneos</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Síguenos</h4>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-400 text-2xl transition-colors">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-400 text-2xl transition-colors">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-pink-400 text-2xl transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-red-400 text-2xl transition-colors">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                    <p class="text-gray-300 text-sm">© 2024 GameHub Pro. Todos los derechos reservados.</p>
+                </div>
+            </div>
+            <div class="border-t border-white border-opacity-20 mt-8 pt-4 text-center">
+                <p class="text-gray-400 text-sm">
+                    Desarrollado por 
+                    <a href="https://rimeddigitalmarketing.web.app/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 font-semibold transition-colors">
+                        Rimed Digital
+                    </a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón Flotante de WhatsApp -->
+    <a href="https://wa.me/1234567890?text=Hola,%20me%20interesa%20GameHub%20Pro" target="_blank" rel="noopener noreferrer" class="whatsapp-float">
+        <div class="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-colors">
+            <i class="fab fa-whatsapp text-2xl"></i>
+        </div>
+    </a>
+
+    <script>
+        // Variables globales
+        let currentGame = 'main';
+        let gameTimers = {};
+        
+        // Sistema de Modal Personalizado
+        function showModal(title, message, icon = '🎉', buttons = null) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modalIcon').textContent = icon;
+            
+            const buttonsContainer = document.getElementById('modalButtons');
+            if (buttons) {
+                buttonsContainer.innerHTML = buttons;
+            } else {
+                buttonsContainer.innerHTML = '<button onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">Aceptar</button>';
+            }
+            
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+        
+        // Funciones de navegación
+        function showGame(game) {
+            document.getElementById('mainPanel').classList.add('hidden');
+            document.getElementById(game + 'Game').classList.remove('hidden');
+            currentGame = game;
+            
+            // Inicializar juegos específicos
+            if (game === 'memory') initMemoryGame();
+            if (game === 'tictactoe') initTicTacToe();
+            if (game === 'quiz') initQuiz();
+            if (game === 'puzzle') initPuzzle();
+            if (game === 'snake') initSnakeGame();
+        }
+        
+        function showMainPanel() {
+            document.querySelectorAll('[id$="Game"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById('mainPanel').classList.remove('hidden');
+            currentGame = 'main';
+            
+            // Limpiar timers
+            Object.values(gameTimers).forEach(timer => clearInterval(timer));
+            gameTimers = {};
+        }
+
+        // Sistema de filtros
+        function filterGames(category) {
+            const games = document.querySelectorAll('[data-category]');
+            const filters = document.querySelectorAll('.category-filter');
+            
+            // Actualizar botones de filtro
+            filters.forEach(btn => {
+                btn.classList.remove('active', 'bg-white', 'text-gray-800');
+                btn.classList.add('bg-white', 'bg-opacity-20', 'text-white');
+            });
+            
+            event.target.classList.remove('bg-white', 'bg-opacity-20', 'text-white');
+            event.target.classList.add('active', 'bg-white', 'text-gray-800');
+            
+            // Mostrar/ocultar juegos
+            games.forEach(game => {
+                if (category === 'all' || game.dataset.category === category) {
+                    game.style.display = 'block';
+                } else {
+                    game.style.display = 'none';
+                }
+            });
+        }
+
+        // Función para compartir
+        function shareWebsite() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'GameHub Pro - Centro de Juegos',
+                    text: '¡Descubre más de 15 juegos increíbles en GameHub Pro!',
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                showModal('¡Enlace Copiado!', 'El enlace ha sido copiado al portapapeles. ¡Compártelo con tus amigos!', '📋');
+            }
+        }
+
+        // JUEGO DE SNAKE MEJORADO
+        let snake = [{x: 10, y: 10}];
+        let food = {x: 15, y: 15};
+        let dx = 0;
+        let dy = 0;
+        let snakeScore = 0;
+        let snakeLevel = 1;
+        let snakeRunning = false;
+        let snakeDifficulty = 'easy';
+        let snakeSpeed = 300;
+        let snakeRecord = localStorage.getItem('snakeRecord') || 0;
+        
+        function initSnakeGame() {
+            document.getElementById('snakeRecord').textContent = snakeRecord;
+        }
+        
+        function setSnakeDifficulty(difficulty) {
+            snakeDifficulty = difficulty;
+            
+            // Actualizar botones
+            document.querySelectorAll('#snakeGame .difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Configurar velocidad
+            switch(difficulty) {
+                case 'easy': snakeSpeed = 300; break;
+                case 'medium': snakeSpeed = 200; break;
+                case 'hard': snakeSpeed = 100; break;
+            }
+        }
+        
+        function startSnakeGame() {
+            snake = [{x: 10, y: 10}];
+            food = {x: 15, y: 15};
+            dx = 0;
+            dy = 0;
+            snakeScore = 0;
+            snakeLevel = 1;
+            snakeRunning = true;
+            
+            document.getElementById('snakeScore').textContent = snakeScore;
+            document.getElementById('snakeLevel').textContent = snakeLevel;
+            
+            const board = document.getElementById('snakeBoard');
+            board.innerHTML = '';
+            board.style.display = 'grid';
+            board.style.gridTemplateColumns = 'repeat(20, 1fr)';
+            board.style.gridTemplateRows = 'repeat(20, 1fr)';
+            
+            for (let i = 0; i < 400; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'snake-cell bg-gray-800';
+                board.appendChild(cell);
+            }
+            
+            generateFood();
+            updateSnakeBoard();
+            gameLoop();
+        }
+        
+        function updateSnakeBoard() {
+            const cells = document.getElementById('snakeBoard').children;
+            
+            // Limpiar tablero
+            for (let cell of cells) {
+                cell.className = 'snake-cell bg-gray-800';
+            }
+            
+            // Dibujar serpiente
+            snake.forEach((segment, index) => {
+                const cellIndex = segment.y * 20 + segment.x;
+                if (cells[cellIndex]) {
+                    cells[cellIndex].className = index === 0 ? 'snake-cell bg-green-400' : 'snake-cell snake';
+                }
+            });
+            
+            // Dibujar comida
+            const foodIndex = food.y * 20 + food.x;
+            if (cells[foodIndex]) cells[foodIndex].className = 'snake-cell food';
+        }
+        
+        function gameLoop() {
+            if (!snakeRunning) return;
+            
+            setTimeout(() => {
+                if (dx !== 0 || dy !== 0) { // Solo mover si hay dirección
+                    moveSnake();
+                    updateSnakeBoard();
+                }
+                gameLoop();
+            }, snakeSpeed);
+        }
+        
+        function moveSnake() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            
+            // Verificar colisiones con paredes
+            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
+                endSnakeGame();
+                return;
+            }
+            
+            // Verificar colisiones consigo mismo
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                endSnakeGame();
+                return;
+            }
+            
+            snake.unshift(head);
+            
+            // Verificar si comió
+            if (head.x === food.x && head.y === food.y) {
+                snakeScore += 10;
+                document.getElementById('snakeScore').textContent = snakeScore;
+                
+                // Subir de nivel cada 50 puntos
+                if (snakeScore % 50 === 0) {
+                    snakeLevel++;
+                    document.getElementById('snakeLevel').textContent = snakeLevel;
+                    snakeSpeed = Math.max(50, snakeSpeed - 20); // Aumentar velocidad
+                }
+                
+                generateFood();
+            } else {
+                snake.pop();
+            }
+        }
+        
+        function generateFood() {
+            do {
+                food = {
+                    x: Math.floor(Math.random() * 20),
+                    y: Math.floor(Math.random() * 20)
+                };
+            } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+        }
+        
+        function endSnakeGame() {
+            snakeRunning = false;
+            
+            // Actualizar récord
+            if (snakeScore > snakeRecord) {
+                snakeRecord = snakeScore;
+                localStorage.setItem('snakeRecord', snakeRecord);
+                document.getElementById('snakeRecord').textContent = snakeRecord;
+                showModal('¡Nuevo Récord!', `¡Felicidades! Has establecido un nuevo récord con ${snakeScore} puntos.`, '🏆');
+            } else {
+                showModal('Juego Terminado', `Puntuación final: ${snakeScore} puntos. Nivel alcanzado: ${snakeLevel}`, '🐍');
+            }
+        }
+        
+        // Controles del Snake mejorados
+        document.addEventListener('keydown', (e) => {
+            if (currentGame !== 'snake' || !snakeRunning) return;
+            
+            switch(e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    if (dy === 0) { dx = 0; dy = -1; }
+                    break;
+                case 'arrowdown':
+                case 's':
+                    if (dy === 0) { dx = 0; dy = 1; }
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    if (dx === 0) { dx = -1; dy = 0; }
+                    break;
+                case 'arrowright':
+                case 'd':
+                    if (dx === 0) { dx = 1; dy = 0; }
+                    break;
+            }
+            e.preventDefault();
+        });
+
+        // JUEGO DE MEMORIA MEJORADO
+        let memoryCards = [];
+        let flippedCards = [];
+        let memoryMoves = 0;
+        let memoryPairs = 0;
+        let memoryDifficulty = 'easy';
+        let memorySize = 4;
+        let memoryStartTime = null;
+        
+        const memorySymbols = ['🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎸', '🎺', '🎻', '🎹', '🎤', '🎧', '🎬', '🎭', '🎪', '🎨', '🎯', '🎮', '🎲', '🎸', '🎺', '🎻', '🎹', '🎤', '🎧', '🎬', '🎭', '🎪', '🎨', '🎯', '🎮', '🎲'];
+        
+        function initMemoryGame() {
+            resetMemoryGame();
+        }
+        
+        function setMemoryDifficulty(difficulty) {
+            memoryDifficulty = difficulty;
+            
+            // Actualizar botones
+            document.querySelectorAll('#memoryGame .difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Configurar tamaño
+            switch(difficulty) {
+                case 'easy': memorySize = 4; break;
+                case 'medium': memorySize = 6; break;
+                case 'hard': memorySize = 8; break;
+            }
+            
+            resetMemoryGame();
+        }
+        
+        function resetMemoryGame() {
+            memoryMoves = 0;
+            memoryPairs = 0;
+            flippedCards = [];
+            memoryStartTime = null;
+            
+            const totalPairs = (memorySize * memorySize) / 2;
+            document.getElementById('memoryMoves').textContent = memoryMoves;
+            document.getElementById('memoryPairs').textContent = memoryPairs;
+            document.getElementById('memoryTotal').textContent = totalPairs;
+            document.getElementById('memoryTime').textContent = '00:00';
+            
+            // Crear cartas
+            const selectedSymbols = memorySymbols.slice(0, totalPairs);
+            memoryCards = [...selectedSymbols, ...selectedSymbols].sort(() => Math.random() - 0.5);
+            
+            const board = document.getElementById('memoryBoard');
+            board.className = `grid gap-4 max-w-2xl mx-auto grid-cols-${memorySize}`;
+            board.innerHTML = '';
+            
+            memoryCards.forEach((symbol, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card w-16 h-16 cursor-pointer';
+                card.innerHTML = `
+                    <div class="memory-card-inner relative w-full h-full">
+                        <div class="memory-card-front absolute inset-0 bg-blue-500 rounded-lg flex items-center justify-center text-2xl">?</div>
+                        <div class="memory-card-back absolute inset-0 bg-white rounded-lg flex items-center justify-center text-2xl">${symbol}</div>
+                    </div>
+                `;
+                card.onclick = () => flipMemoryCard(index);
+                board.appendChild(card);
+            });
+            
+            // Limpiar timer anterior
+            if (gameTimers.memory) clearInterval(gameTimers.memory);
+        }
+        
+        function flipMemoryCard(index) {
+            if (flippedCards.length === 2 || flippedCards.includes(index)) return;
+            
+            // Iniciar timer en el primer movimiento
+            if (!memoryStartTime) {
+                memoryStartTime = Date.now();
+                gameTimers.memory = setInterval(updateMemoryTimer, 1000);
+            }
+            
+            const card = document.getElementById('memoryBoard').children[index];
+            card.classList.add('flipped');
+            flippedCards.push(index);
+            
+            if (flippedCards.length === 2) {
+                memoryMoves++;
+                document.getElementById('memoryMoves').textContent = memoryMoves;
+                
+                setTimeout(() => {
+                    if (memoryCards[flippedCards[0]] === memoryCards[flippedCards[1]]) {
+                        memoryPairs++;
+                        document.getElementById('memoryPairs').textContent = memoryPairs;
+                        
+                        const totalPairs = (memorySize * memorySize) / 2;
+                        if (memoryPairs === totalPairs) {
+                            clearInterval(gameTimers.memory);
+                            const timeElapsed = Math.floor((Date.now() - memoryStartTime) / 1000);
+                            showModal('¡Felicidades!', `Completaste el juego en ${memoryMoves} movimientos y ${formatTime(timeElapsed)}`, '🧠');
+                        }
+                    } else {
+                        document.getElementById('memoryBoard').children[flippedCards[0]].classList.remove('flipped');
+                        document.getElementById('memoryBoard').children[flippedCards[1]].classList.remove('flipped');
+                    }
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+        
+        function updateMemoryTimer() {
+            if (memoryStartTime) {
+                const elapsed = Math.floor((Date.now() - memoryStartTime) / 1000);
+                document.getElementById('memoryTime').textContent = formatTime(elapsed);
+            }
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // TRES EN RAYA CON IA MEJORADA
+        let tictactoeBoard = Array(9).fill('');
+        let currentPlayer = 'X';
+        let tictactoeGameOver = false;
+        let aiDifficulty = 'easy';
+        let playerWins = localStorage.getItem('playerWins') || 0;
+        let aiWins = localStorage.getItem('aiWins') || 0;
+        let draws = localStorage.getItem('draws') || 0;
+        
+        function initTicTacToe() {
+            document.getElementById('playerWins').textContent = playerWins;
+            document.getElementById('aiWins').textContent = aiWins;
+            document.getElementById('draws').textContent = draws;
+            resetTicTacToe();
+        }
+        
+        function setTicTacToeDifficulty(difficulty) {
+            aiDifficulty = difficulty;
+            
+            // Actualizar botones
+            document.querySelectorAll('#tictactoeGame .difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+        
+        function resetTicTacToe() {
+            tictactoeBoard = Array(9).fill('');
+            currentPlayer = 'X';
+            tictactoeGameOver = false;
+            document.getElementById('tictactoeStatus').textContent = 'Turno del Jugador X';
+            
+            const board = document.getElementById('tictactoeBoard');
+            board.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'w-20 h-20 bg-white border-2 border-gray-300 flex items-center justify-center text-4xl font-bold cursor-pointer hover:bg-gray-100 transition-colors';
+                cell.onclick = () => makeTicTacToeMove(i);
+                board.appendChild(cell);
+            }
+        }
+        
+        function makeTicTacToeMove(index) {
+            if (tictactoeBoard[index] || tictactoeGameOver || currentPlayer === 'O') return;
+            
+            tictactoeBoard[index] = currentPlayer;
+            document.getElementById('tictactoeBoard').children[index].textContent = currentPlayer;
+            document.getElementById('tictactoeBoard').children[index].classList.add('text-blue-600');
+            
+            if (checkTicTacToeWin()) {
+                endTicTacToeGame('player');
+            } else if (tictactoeBoard.every(cell => cell)) {
+                endTicTacToeGame('draw');
+            } else {
+                currentPlayer = 'O';
+                document.getElementById('tictactoeStatus').textContent = 'Turno de la IA';
+                
+                // IA hace su movimiento
+                setTimeout(() => {
+                    makeAIMove();
+                }, 500);
+            }
+        }
+        
+        function makeAIMove() {
+            let move;
+            
+            switch(aiDifficulty) {
+                case 'easy':
+                    move = getRandomMove();
+                    break;
+                case 'medium':
+                    move = Math.random() < 0.7 ? getBestMove() : getRandomMove();
+                    break;
+                case 'hard':
+                    move = getBestMove();
+                    break;
+            }
+            
+            if (move !== -1) {
+                tictactoeBoard[move] = 'O';
+                document.getElementById('tictactoeBoard').children[move].textContent = 'O';
+                document.getElementById('tictactoeBoard').children[move].classList.add('text-red-600');
+                
+                if (checkTicTacToeWin()) {
+                    endTicTacToeGame('ai');
+                } else if (tictactoeBoard.every(cell => cell)) {
+                    endTicTacToeGame('draw');
+                } else {
+                    currentPlayer = 'X';
+                    document.getElementById('tictactoeStatus').textContent = 'Turno del Jugador X';
+                }
+            }
+        }
+        
+        function getRandomMove() {
+            const availableMoves = tictactoeBoard.map((cell, index) => cell === '' ? index : null).filter(val => val !== null);
+            return availableMoves.length > 0 ? availableMoves[Math.floor(Math.random() * availableMoves.length)] : -1;
+        }
+        
+        function getBestMove() {
+            // Algoritmo minimax simplificado
+            let bestScore = -Infinity;
+            let bestMove = -1;
+            
+            for (let i = 0; i < 9; i++) {
+                if (tictactoeBoard[i] === '') {
+                    tictactoeBoard[i] = 'O';
+                    let score = minimax(tictactoeBoard, 0, false);
+                    tictactoeBoard[i] = '';
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            return bestMove;
+        }
+        
+        function minimax(board, depth, isMaximizing) {
+            let result = checkWinner(board);
+            if (result !== null) {
+                return result === 'O' ? 1 : result === 'X' ? -1 : 0;
+            }
+            
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+        
+        function checkWinner(board) {
+            const winPatterns = [
+                [0,1,2], [3,4,5], [6,7,8], // filas
+                [0,3,6], [1,4,7], [2,5,8], // columnas
+                [0,4,8], [2,4,6] // diagonales
+            ];
+            
+            for (let pattern of winPatterns) {
+                if (pattern.every(index => board[index] === 'X')) return 'X';
+                if (pattern.every(index => board[index] === 'O')) return 'O';
+            }
+            
+            return board.every(cell => cell) ? 'draw' : null;
+        }
+        
+        function checkTicTacToeWin() {
+            return checkWinner(tictactoeBoard) === currentPlayer;
+        }
+        
+        function endTicTacToeGame(winner) {
+            tictactoeGameOver = true;
+            
+            if (winner === 'player') {
+                playerWins++;
+                localStorage.setItem('playerWins', playerWins);
+                document.getElementById('playerWins').textContent = playerWins;
+                document.getElementById('tictactoeStatus').textContent = '¡Jugador X gana!';
+                showModal('¡Victoria!', '¡Felicidades! Has ganado esta partida.', '🏆');
+            } else if (winner === 'ai') {
+                aiWins++;
+                localStorage.setItem('aiWins', aiWins);
+                document.getElementById('aiWins').textContent = aiWins;
+                document.getElementById('tictactoeStatus').textContent = '¡La IA gana!';
+                showModal('Derrota', 'La IA ha ganado esta vez. ¡Inténtalo de nuevo!', '🤖');
+            } else {
+                draws++;
+                localStorage.setItem('draws', draws);
+                document.getElementById('draws').textContent = draws;
+                document.getElementById('tictactoeStatus').textContent = '¡Empate!';
+                showModal('Empate', 'Esta partida ha terminado en empate.', '🤝');
+            }
+        }
+
+        // QUIZ MEJORADO CON MÚLTIPLES CATEGORÍAS
+        const quizCategories = {
+            general: [
+                { question: "¿Cuál es la capital de España?", options: ["Barcelona", "Madrid", "Valencia", "Sevilla"], correct: 1 },
+                { question: "¿En qué año llegó el hombre a la Luna?", options: ["1967", "1968", "1969", "1970"], correct: 2 },
+                { question: "¿Cuál es el planeta más grande del sistema solar?", options: ["Saturno", "Júpiter", "Neptuno", "Urano"], correct: 1 },
+                { question: "¿Quién escribió 'Don Quijote de la Mancha'?", options: ["Lope de Vega", "Miguel de Cervantes", "Calderón de la Barca", "Garcilaso de la Vega"], correct: 1 },
+                { question: "¿Cuál es el océano más grande del mundo?", options: ["Atlántico", "Índico", "Ártico", "Pacífico"], correct: 3 },
+                { question: "¿Cuántos continentes hay?", options: ["5", "6", "7", "8"], correct: 2 },
+                { question: "¿Cuál es el río más largo del mundo?", options: ["Nilo", "Amazonas", "Yangtsé", "Misisipi"], correct: 1 },
+                { question: "¿En qué país se encuentra Machu Picchu?", options: ["Chile", "Bolivia", "Perú", "Ecuador"], correct: 2 },
+                { question: "¿Cuál es el metal más abundante en la Tierra?", options: ["Hierro", "Aluminio", "Cobre", "Oro"], correct: 1 },
+                { question: "¿Quién pintó la Mona Lisa?", options: ["Van Gogh", "Picasso", "Leonardo da Vinci", "Monet"], correct: 2 }
+            ],
+            science: [
+                { question: "¿Cuál es el símbolo químico del oro?", options: ["Go", "Au", "Ag", "Or"], correct: 1 },
+                { question: "¿Cuántos huesos tiene el cuerpo humano adulto?", options: ["206", "208", "210", "212"], correct: 0 },
+                { question: "¿Cuál es la velocidad de la luz?", options: ["300,000 km/s", "150,000 km/s", "450,000 km/s", "600,000 km/s"], correct: 0 },
+                { question: "¿Qué gas es más abundante en la atmósfera?", options: ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Argón"], correct: 1 },
+                { question: "¿Cuál es la unidad básica de la vida?", options: ["Átomo", "Molécula", "Célula", "Tejido"], correct: 2 },
+                { question: "¿Quién propuso la teoría de la evolución?", options: ["Newton", "Einstein", "Darwin", "Mendel"], correct: 2 },
+                { question: "¿Cuál es el planeta más cercano al Sol?", options: ["Venus", "Mercurio", "Tierra", "Marte"], correct: 1 },
+                { question: "¿Qué tipo de animal es una ballena?", options: ["Pez", "Mamífero", "Reptil", "Anfibio"], correct: 1 },
+                { question: "¿Cuántos elementos hay en la tabla periódica?", options: ["108", "112", "118", "120"], correct: 2 },
+                { question: "¿Qué órgano produce la insulina?", options: ["Hígado", "Riñón", "Páncreas", "Estómago"], correct: 2 }
+            ],
+            history: [
+                { question: "¿En qué año comenzó la Segunda Guerra Mundial?", options: ["1938", "1939", "1940", "1941"], correct: 1 },
+                { question: "¿Quién fue el primer emperador romano?", options: ["Julio César", "Augusto", "Nerón", "Trajano"], correct: 1 },
+                { question: "¿En qué año cayó el Muro de Berlín?", options: ["1987", "1988", "1989", "1990"], correct: 2 },
+                { question: "¿Cuál fue la primera civilización conocida?", options: ["Egipcia", "Griega", "Sumeria", "China"], correct: 2 },
+                { question: "¿Quién descubrió América?", options: ["Vasco da Gama", "Cristóbal Colón", "Fernando de Magallanes", "Américo Vespucio"], correct: 1 },
+                { question: "¿En qué año terminó la Primera Guerra Mundial?", options: ["1917", "1918", "1919", "1920"], correct: 1 },
+                { question: "¿Cuál fue el imperio más grande de la historia?", options: ["Romano", "Británico", "Mongol", "Otomano"], correct: 1 },
+                { question: "¿Quién fue conocido como el 'Rey Sol'?", options: ["Luis XIII", "Luis XIV", "Luis XV", "Luis XVI"], correct: 1 },
+                { question: "¿En qué siglo vivió Leonardo da Vinci?", options: ["XIV", "XV", "XVI", "XVII"], correct: 1 },
+                { question: "¿Cuál fue la capital del Imperio Inca?", options: ["Lima", "Cusco", "Quito", "La Paz"], correct: 1 }
+            ],
+            sports: [
+                { question: "¿Cada cuántos años se celebran los Juegos Olímpicos?", options: ["2 años", "3 años", "4 años", "5 años"], correct: 2 },
+                { question: "¿En qué deporte se usa un 'birdie'?", options: ["Golf", "Tenis", "Bádminton", "Ping pong"], correct: 2 },
+                { question: "¿Cuántos jugadores hay en un equipo de fútbol?", options: ["10", "11", "12", "13"], correct: 1 },
+                { question: "¿Quién tiene más Balones de Oro?", options: ["Pelé", "Messi", "Cristiano", "Maradona"], correct: 1 },
+                { question: "¿En qué país se inventó el baloncesto?", options: ["Canadá", "Estados Unidos", "Inglaterra", "Francia"], correct: 1 },
+                { question: "¿Cuántos sets se necesitan para ganar en tenis masculino en Grand Slam?", options: ["2", "3", "4", "5"], correct: 1 },
+                { question: "¿Qué país ha ganado más Copas del Mundo de fútbol?", options: ["Argentina", "Alemania", "Brasil", "Italia"], correct: 2 },
+                { question: "¿Cuántos puntos vale un touchdown en fútbol americano?", options: ["5", "6", "7", "8"], correct: 1 },
+                { question: "¿En qué deporte compite Usain Bolt?", options: ["Natación", "Atletismo", "Ciclismo", "Gimnasia"], correct: 1 },
+                { question: "¿Cuántos jugadores hay en un equipo de voleibol?", options: ["5", "6", "7", "8"], correct: 1 }
+            ],
+            geography: [
+                { question: "¿Cuál es el país más grande del mundo?", options: ["China", "Canadá", "Estados Unidos", "Rusia"], correct: 3 },
+                { question: "¿Cuál es la montaña más alta del mundo?", options: ["K2", "Everest", "Kilimanjaro", "Aconcagua"], correct: 1 },
+                { question: "¿Cuál es el desierto más grande del mundo?", options: ["Sahara", "Gobi", "Atacama", "Antártida"], correct: 3 },
+                { question: "¿Cuántos países hay en África?", options: ["52", "54", "56", "58"], correct: 1 },
+                { question: "¿Cuál es la capital de Australia?", options: ["Sydney", "Melbourne", "Canberra", "Perth"], correct: 2 },
+                { question: "¿Qué país tiene más islas en el mundo?", options: ["Noruega", "Suecia", "Finlandia", "Dinamarca"], correct: 2 },
+                { question: "¿Cuál es el lago más profundo del mundo?", options: ["Superior", "Baikal", "Tanganica", "Caspio"], correct: 1 },
+                { question: "¿En qué continente está ubicado Egipto?", options: ["Asia", "África", "Europa", "Oceanía"], correct: 1 },
+                { question: "¿Cuál es el estrecho que separa Europa de África?", options: ["Bósforo", "Gibraltar", "Dardanelos", "Ormuz"], correct: 1 },
+                { question: "¿Cuál es la capital de Canadá?", options: ["Toronto", "Vancouver", "Montreal", "Ottawa"], correct: 3 }
+            ]
+        };
+        
+        let currentQuizQuestion = 0;
+        let quizScore = 0;
+        let quizCategory = 'general';
+        let quizQuestions = [];
+        let quizTimer = 30;
+        let quizTimeLeft = 30;
+        
+        function initQuiz() {
+            setQuizCategory('general');
+        }
+        
+        function setQuizCategory(category) {
+            quizCategory = category;
+            
+            // Actualizar botones
+            document.querySelectorAll('#quizGame .difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Reiniciar quiz
+            currentQuizQuestion = 0;
+            quizScore = 0;
+            quizQuestions = [...quizCategories[category]].sort(() => Math.random() - 0.5);
+            
+            document.getElementById('quizScore').textContent = quizScore;
+            document.getElementById('quizCurrent').textContent = 1;
+            document.getElementById('quizTotal').textContent = quizQuestions.length;
+            
+            showQuizQuestion();
+        }
+        
+        function showQuizQuestion() {
+            if (currentQuizQuestion >= quizQuestions.length) {
+                endQuiz();
+                return;
+            }
+            
+            const question = quizQuestions[currentQuizQuestion];
+            document.getElementById('quizQuestion').textContent = question.question;
+            
+            const optionsDiv = document.getElementById('quizOptions');
+            optionsDiv.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'w-full p-4 text-left bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors';
+                button.textContent = option;
+                button.onclick = () => selectQuizAnswer(index);
+                optionsDiv.appendChild(button);
+            });
+            
+            document.getElementById('quizNext').classList.add('hidden');
+            
+            // Iniciar timer
+            quizTimeLeft = quizTimer;
+            document.getElementById('quizTimer').textContent = quizTimeLeft;
+            
+            if (gameTimers.quiz) clearInterval(gameTimers.quiz);
+            gameTimers.quiz = setInterval(() => {
+                quizTimeLeft--;
+                document.getElementById('quizTimer').textContent = quizTimeLeft;
+                
+                if (quizTimeLeft <= 0) {
+                    clearInterval(gameTimers.quiz);
+                    selectQuizAnswer(-1); // Tiempo agotado
+                }
+            }, 1000);
+        }
+        
+        function selectQuizAnswer(selectedIndex) {
+            clearInterval(gameTimers.quiz);
+            
+            const question = quizQuestions[currentQuizQuestion];
+            const options = document.getElementById('quizOptions').children;
+            
+            // Deshabilitar todas las opciones
+            for (let option of options) {
+                option.disabled = true;
+                option.classList.remove('hover:bg-gray-200');
+            }
+            
+            // Mostrar respuesta correcta
+            options[question.correct].classList.add('bg-green-500', 'text-white');
+            
+            if (selectedIndex === question.correct) {
+                quizScore += Math.max(1, Math.floor(quizTimeLeft / 3)); // Bonus por tiempo
+                document.getElementById('quizScore').textContent = quizScore;
+            } else if (selectedIndex >= 0) {
+                options[selectedIndex].classList.add('bg-red-500', 'text-white');
+            }
+            
+            document.getElementById('quizNext').classList.remove('hidden');
+        }
+        
+        function nextQuestion() {
+            currentQuizQuestion++;
+            document.getElementById('quizCurrent').textContent = currentQuizQuestion + 1;
+            showQuizQuestion();
+        }
+        
+        function endQuiz() {
+            clearInterval(gameTimers.quiz);
+            const percentage = Math.round((quizScore / (quizQuestions.length * 10)) * 100);
+            let message = `Puntuación: ${quizScore} puntos (${percentage}%)`;
+            let icon = '🧩';
+            
+            if (percentage >= 90) {
+                message += '\n¡Excelente conocimiento!';
+                icon = '🏆';
+            } else if (percentage >= 70) {
+                message += '\n¡Muy bien!';
+                icon = '⭐';
+            } else if (percentage >= 50) {
+                message += '\n¡No está mal!';
+                icon = '👍';
+            } else {
+                message += '\n¡Sigue practicando!';
+                icon = '📚';
+            }
+            
+            showModal('Quiz Completado', message, icon);
+            
+            // Reiniciar para jugar de nuevo
+            setTimeout(() => {
+                document.getElementById('quizQuestion').textContent = 'Selecciona una categoría para comenzar un nuevo quiz';
+                document.getElementById('quizOptions').innerHTML = '';
+                document.getElementById('quizNext').classList.add('hidden');
+            }, 3000);
+        }
+
+        // PUZZLE 15 MEJORADO
+        let puzzleBoard = [];
+        let puzzleMoves = 0;
+        let emptyIndex = 15;
+        let puzzleSize = 4;
+        let puzzleStartTime = null;
+        
+        function initPuzzle() {
+            setPuzzleSize(4);
+        }
+        
+        function setPuzzleSize(size) {
+            puzzleSize = size;
+            emptyIndex = (size * size) - 1;
+            
+            // Actualizar botones
+            document.querySelectorAll('#puzzleGame .difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Inicializar puzzle
+            puzzleBoard = Array.from({length: size * size}, (_, i) => i === (size * size - 1) ? 0 : i + 1);
+            puzzleMoves = 0;
+            puzzleStartTime = null;
+            
+            document.getElementById('puzzleMoves').textContent = puzzleMoves;
+            document.getElementById('puzzleTime').textContent = '00:00';
+            
+            renderPuzzle();
+            
+            // Limpiar timer anterior
+            if (gameTimers.puzzle) clearInterval(gameTimers.puzzle);
+        }
+        
+        function renderPuzzle() {
+            const board = document.getElementById('puzzleBoard');
+            board.className = `grid gap-2 max-w-md mx-auto grid-cols-${puzzleSize}`;
+            board.innerHTML = '';
+            
+            puzzleBoard.forEach((num, index) => {
+                const tile = document.createElement('div');
+                const tileSize = puzzleSize === 3 ? 'w-20 h-20' : puzzleSize === 4 ? 'w-16 h-16' : 'w-12 h-12';
+                tile.className = num === 0 ? 
+                    `${tileSize} bg-gray-300 rounded-lg` : 
+                    `${tileSize} bg-blue-500 text-white flex items-center justify-center text-xl font-bold cursor-pointer hover:bg-blue-600 transition-colors rounded-lg`;
+                tile.textContent = num === 0 ? '' : num;
+                if (num !== 0) tile.onclick = () => movePuzzleTile(index);
+                board.appendChild(tile);
+            });
+        }
+        
+        function movePuzzleTile(index) {
+            // Iniciar timer en el primer movimiento
+            if (!puzzleStartTime) {
+                puzzleStartTime = Date.now();
+                gameTimers.puzzle = setInterval(updatePuzzleTimer, 1000);
+            }
+            
+            const row = Math.floor(index / puzzleSize);
+            const col = index % puzzleSize;
+            const emptyRow = Math.floor(emptyIndex / puzzleSize);
+            const emptyCol = emptyIndex % puzzleSize;
+            
+            // Verificar si el movimiento es válido
+            if (Math.abs(row - emptyRow) + Math.abs(col - emptyCol) === 1) {
+                puzzleBoard[emptyIndex] = puzzleBoard[index];
+                puzzleBoard[index] = 0;
+                emptyIndex = index;
+                puzzleMoves++;
+                document.getElementById('puzzleMoves').textContent = puzzleMoves;
+                renderPuzzle();
+                
+                // Verificar si ganó
+                if (checkPuzzleWin()) {
+                    clearInterval(gameTimers.puzzle);
+                    const timeElapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
+                    showModal('¡Felicidades!', `Completaste el puzzle en ${puzzleMoves} movimientos y ${formatTime(timeElapsed)}`, '🧩');
+                }
+            }
+        }
+        
+        function updatePuzzleTimer() {
+            if (puzzleStartTime) {
+                const elapsed = Math.floor((Date.now() - puzzleStartTime) / 1000);
+                document.getElementById('puzzleTime').textContent = formatTime(elapsed);
+            }
+        }
+        
+        function checkPuzzleWin() {
+            for (let i = 0; i < puzzleSize * puzzleSize - 1; i++) {
+                if (puzzleBoard[i] !== i + 1) return false;
+            }
+            return puzzleBoard[puzzleSize * puzzleSize - 1] === 0;
+        }
+        
+        function shufflePuzzle() {
+            // Realizar movimientos aleatorios válidos para mezclar
+            for (let i = 0; i < 1000; i++) {
+                const possibleMoves = [];
+                const row = Math.floor(emptyIndex / puzzleSize);
+                const col = emptyIndex % puzzleSize;
+                
+                if (row > 0) possibleMoves.push(emptyIndex - puzzleSize);
+                if (row < puzzleSize - 1) possibleMoves.push(emptyIndex + puzzleSize);
+                if (col > 0) possibleMoves.push(emptyIndex - 1);
+                if (col < puzzleSize - 1) possibleMoves.push(emptyIndex + 1);
+                
+                const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                puzzleBoard[emptyIndex] = puzzleBoard[randomMove];
+                puzzleBoard[randomMove] = 0;
+                emptyIndex = randomMove;
+            }
+            
+            puzzleMoves = 0;
+            puzzleStartTime = null;
+            document.getElementById('puzzleMoves').textContent = puzzleMoves;
+            document.getElementById('puzzleTime').textContent = '00:00';
+            renderPuzzle();
+            
+            // Limpiar timer anterior
+            if (gameTimers.puzzle) clearInterval(gameTimers.puzzle);
+        }
+
+        // CALCULADORA CIENTÍFICA MEJORADA
+        let calculatorDisplay = '0';
+        let calculatorPreviousValue = null;
+        let calculatorOperation = null;
+        let calculatorWaitingForOperand = false;
+        
+        function updateCalculatorDisplay() {
+            const display = document.getElementById('calculatorDisplay');
+            display.textContent = calculatorDisplay.length > 12 ? calculatorDisplay.slice(-12) : calculatorDisplay;
+        }
+        
+        function appendToDisplay(value) {
+            if (calculatorWaitingForOperand) {
+                calculatorDisplay = value;
+                calculatorWaitingForOperand = false;
+            } else {
+                calculatorDisplay = calculatorDisplay === '0' ? value : calculatorDisplay + value;
+            }
+            updateCalculatorDisplay();
+        }
+        
+        function clearCalculator() {
+            calculatorDisplay = '0';
+            calculatorPreviousValue = null;
+            calculatorOperation = null;
+            calculatorWaitingForOperand = false;
+            updateCalculatorDisplay();
+        }
+        
+        function deleteLast() {
+            calculatorDisplay = calculatorDisplay.slice(0, -1) || '0';
+            updateCalculatorDisplay();
+        }
+        
+        function calculate() {
+            try {
+                // Evaluar la expresión matemática de forma segura
+                let expression = calculatorDisplay.replace(/×/g, '*').replace(/÷/g, '/');
+                let result = Function('"use strict"; return (' + expression + ')')();
+                
+                if (isNaN(result) || !isFinite(result)) {
+                    calculatorDisplay = 'Error';
+                } else {
+                    calculatorDisplay = result.toString();
+                }
+            } catch (error) {
+                calculatorDisplay = 'Error';
+            }
+            
+            calculatorWaitingForOperand = true;
+            updateCalculatorDisplay();
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar filtros iniciales
+            filterGames('all');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98277002853ddc77',t:'MTc1ODQzNTQyNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
